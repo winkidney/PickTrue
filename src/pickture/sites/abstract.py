@@ -1,4 +1,7 @@
 
 
 class DummySite:
-    pass
+
+    @property
+    def tasks(self):
+        raise NotImplementedError()
