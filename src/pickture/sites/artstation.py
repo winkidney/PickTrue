@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import requests
 
 from pickture.meta import ImageItem, UA
+from pickture.sites.abstract import DummySite
 
 
 BASE_URL = "https://www.artstation.com/"
@@ -210,8 +211,7 @@ def has_next_page(current_count, total_count):
     return current_count < total_count
 
 
-class ArtStation:
-
+class ArtStation(DummySite):
     """
     >>> art = ArtStation("https://www.artstation.com/braveking")
     >>> len(list(art.tasks)) > 0
