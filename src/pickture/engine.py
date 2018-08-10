@@ -84,7 +84,7 @@ def download_then_save(url, save_path):
 
 class Downloader:
 
-    def __init__(self, num_workers=5, ):
+    def __init__(self, num_workers=5, save_dir='.'):
         self.num_workers = num_workers
         self._download_queue = Queue()
         self._download_workers = [
