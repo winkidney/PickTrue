@@ -17,6 +17,7 @@ def get_name_from_url(img_url: str):
         '/'
     )[-1]
     file_name = file_name.split('?')[:-1]
+    file_name = '?'.join(file_name)
     return file_name
 
 
@@ -223,6 +224,10 @@ class ArtStation(DummySite):
         self.url = user_url
         assert user_url.startswith(BASE_URL)
         self.user_id = user_url.replace(BASE_URL, '')
+
+    @property
+    def dir_name(self):
+        return self.user_id
 
     @staticmethod
     def _get_image_item_from_detail(artwork_summary):
