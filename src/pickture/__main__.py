@@ -1,5 +1,3 @@
-import time
-
 import click
 
 from pickture.sites.artstation import ArtStation
