@@ -13,7 +13,6 @@ def artstation():
 def artstation_user(url):
     site = ArtStation(url)
     downloader = Downloader(save_dir=site.dir_name)
-    downloader.start()
     downloader.add_task(
         site.tasks
     )
