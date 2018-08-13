@@ -8,6 +8,7 @@ from functools import wraps
 import requests
 
 from pickture.logger import download_logger
+from pickture.utils import run_as_thread
 
 
 TaskItem = namedtuple(
@@ -36,7 +37,7 @@ class StoppableThread(Thread):
     def run(self):
         while not self._stopped:
             try:
-                task = self.queue.get(timeout=1)
+                task = self.queue.get(timeout=0.2)
             except Empty:
                 continue
             else:
@@ -112,6 +113,9 @@ class Downloader:
         self.num_workers = num_workers
         self._download_queue = Queue()
         self.counter = Counter()
+        self.done = False
+        self._stop = False
+        self.ensure_dir()
 
         def counter_wrapper(func):
 
@@ -131,14 +135,22 @@ class Downloader:
                 _dts,
             ) for _ in range(num_workers)
         ]
-        self.ensure_dir()
+        self._start_daemons()
 
     def ensure_dir(self):
         if not os.path.exists(self.save_dir):
             os.mkdir(self.save_dir)
 
-    def add_task(self, task_iter):
+    def add_task(self, task_iter, background=False):
+        if background:
+            run_as_thread(self._add_task, task_iter)
+        else:
+            self._add_task(task_iter)
+
+    def _add_task(self, task_iter):
         for task in task_iter:
+            if self._stop:
+                break
             self.counter.increment_total()
             self._download_queue.put(
                 TaskItem(
@@ -150,14 +162,23 @@ class Downloader:
                 )
             )
 
-    def start(self):
+    def _start_daemons(self):
         for worker in self._download_workers:
             worker.start()
 
-    def join(self):
-        self._download_queue.join()
+    def join(self, background=False):
+
+        def run():
+            self._download_queue.join()
+            self.done = True
+
+        if background:
+            run_as_thread(run)
+        else:
+            run()
 
     def stop(self):
+        self._stop = True
         for worker in self._download_workers:
             worker.stop()
 
