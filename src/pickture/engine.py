@@ -90,11 +90,16 @@ class Counter:
         self.total = total
         self.done = 0
 
+    def on_change(self):
+        print(self.format(), end='\r', flush=True)
+
     def increment_done(self):
         self.done += 1
+        self.on_change()
 
     def increment_total(self):
         self.total += 1
+        self.on_change()
 
     def format(self):
         return "total: %s, done: %s" % (self.total, self.done)
@@ -114,7 +119,6 @@ class Downloader:
             def wrapped(*args, **kwargs):
                 ret = func(*args, **kwargs)
                 self.counter.increment_done()
-                print(self.counter.format())
                 return ret
 
             return wrapped
