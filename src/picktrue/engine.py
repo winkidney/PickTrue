@@ -7,8 +7,8 @@ from functools import wraps
 
 import requests
 
-from pickture.logger import download_logger
-from pickture.utils import run_as_thread
+from picktrue.logger import download_logger
+from picktrue.utils import run_as_thread
 
 
 TaskItem = namedtuple(
@@ -162,7 +162,7 @@ class Downloader:
                     },
                 )
             )
-        self.all_task_add = True
+        self._all_task_add = True
 
     def _start_daemons(self):
         for worker in self._download_workers:
@@ -172,6 +172,7 @@ class Downloader:
 
         def run():
             while not self._all_task_add:
+                time.sleep(0.2)
                 self._download_queue.join()
             self.done = True
 

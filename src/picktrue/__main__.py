@@ -1,6 +1,6 @@
 import click
 
-from pickture.sites.artstation import ArtStation
+from picktrue.sites.artstation import ArtStation
 from .engine import Downloader
 
 
