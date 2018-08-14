@@ -8,8 +8,7 @@ from functools import wraps
 import requests
 
 from picktrue.logger import download_logger
-from picktrue.utils import run_as_thread
-
+from picktrue.utils import run_as_thread, retry
 
 TaskItem = namedtuple(
     'TaskItem',
@@ -50,27 +49,6 @@ class StoppableThread(Thread):
         self._stopped = True
 
 
-def retry(max_retries=3):
-
-    def wrapper(func):
-        @wraps(func)
-        def wrapped(*args, **kwargs):
-            retries = 0
-            while retries <= max_retries:
-                retries += 1
-                try:
-                    return func(*args, **kwargs)
-                except Exception:
-                    if retries > max_retries:
-                        download_logger.exception("Error occurs while execute function\n")
-                        break
-                    time.sleep(1)
-            return None
-        return wrapped
-
-    return wrapper
-
-
 def mk_download_save_function(fetcher):
     """
     :type fetcher: picktrue.sites.abstract.DummyFetcher
@@ -88,6 +66,8 @@ def mk_download_save_function(fetcher):
         with open(save_path, "wb") as f:
             f.write(response.content)
         return True
+
+    return download_then_save
 
 
 class Counter:
@@ -137,7 +117,7 @@ class Downloader:
             fetcher
         )
 
-        _dts = counter_wrapper()
+        _dts = counter_wrapper(download_then_save)
 
         self._download_workers = [
             StoppableThread(
