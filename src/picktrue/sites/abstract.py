@@ -4,6 +4,10 @@ import requests
 class DummySite:
 
     @property
+    def fetcher(self):
+        raise NotImplementedError()
+
+    @property
     def tasks(self):
         raise NotImplementedError()
 
