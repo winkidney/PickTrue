@@ -19,4 +19,9 @@ setup(
     author='winkidney',
     author_email='winkidney@gmail.com',
     description='tools to download pictures you want',
+    entry_points = {
+        'console_scripts': [
+            'pickture-cli=pickture.__main__:main',
+        ]
+    },
 )

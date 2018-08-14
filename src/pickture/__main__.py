@@ -27,6 +27,9 @@ def artstation_user(url):
         print("All task done...Enjoy!")
 
 
-if __name__ == "__main__":
+def main():
     artstation()
+
+if __name__ == "__main__":
+    main()
 
