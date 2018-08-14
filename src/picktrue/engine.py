@@ -71,18 +71,23 @@ def retry(max_retries=3):
     return wrapper
 
 
-@retry()
-def download_then_save(url, save_path):
+def mk_download_save_function(fetcher):
     """
-    :return True if download ok
+    :type fetcher: picktrue.sites.abstract.DummyFetcher
     """
-    response = requests.get(url, timeout=(2, 10))
-    if response is None:
-        download_logger.error("Failed to download image: %s" % url)
-        return
-    with open(save_path, "wb") as f:
-        f.write(response.content)
-    return True
+
+    @retry()
+    def download_then_save(url, save_path):
+        """
+        :return True if download ok
+        """
+        response = fetcher.get(url)
+        if response is None:
+            download_logger.error("Failed to download image: %s" % url)
+            return
+        with open(save_path, "wb") as f:
+            f.write(response.content)
+        return True
 
 
 class Counter:
@@ -108,7 +113,7 @@ class Counter:
 
 class Downloader:
 
-    def __init__(self, num_workers=5, save_dir='.'):
+    def __init__(self, fetcher, num_workers=5, save_dir='.'):
         self.save_dir = save_dir
         self.num_workers = num_workers
         self._download_queue = Queue()
@@ -128,7 +133,11 @@ class Downloader:
 
             return wrapped
 
-        _dts = counter_wrapper(download_then_save)
+        download_then_save = mk_download_save_function(
+            fetcher
+        )
+
+        _dts = counter_wrapper()
 
         self._download_workers = [
             StoppableThread(

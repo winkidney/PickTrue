@@ -4,8 +4,7 @@ from urllib.parse import urljoin
 import requests
 
 from picktrue.meta import ImageItem, UA
-from picktrue.sites.abstract import DummySite
-
+from picktrue.sites.abstract import DummySite, DummyFetcher
 
 BASE_URL = "https://www.artstation.com/"
 PROJECT_URL_TPL = '/users/{user_id}/projects.json?page={page}'
@@ -219,6 +218,8 @@ class ArtStation(DummySite):
     True
     """
 
+    fetcher = DummyFetcher()
+
     def __init__(self, user_url: str):
         self._tasks = None
         self.url = user_url
@@ -262,7 +263,6 @@ class ArtStation(DummySite):
             current_count += count_delta
             yield from self._yield_image_items(data)
             time.sleep(0.2)
-
 
     @property
     def tasks(self):

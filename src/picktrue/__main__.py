@@ -8,11 +8,12 @@ from .engine import Downloader
 def artstation():
     pass
 
+
 @click.argument("url")
 @artstation.command("user")
 def artstation_user(url):
     site = ArtStation(url)
-    downloader = Downloader(save_dir=site.dir_name)
+    downloader = Downloader(fetcher=site.fetcher, save_dir=site.dir_name)
     downloader.add_task(
         site.tasks
     )
@@ -30,6 +31,6 @@ def artstation_user(url):
 def main():
     artstation()
 
+
 if __name__ == "__main__":
     main()
-
