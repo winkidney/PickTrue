@@ -44,9 +44,6 @@ class NamedInput(tk.Frame):
         self.entry.pack(side=tk.LEFT, fill=tk.X, expand=1)
         self.pack(fill=tk.X)
 
-    def set_label(self, text):
-        self.text.set(text)
-
     def get_input(self):
         return self.entry.get()
 
@@ -83,23 +80,22 @@ class FileBrowse(tk.Frame):
         return self.label_text.get()
 
 
-class Downloader(tk.Tk):
+class ArtStation(tk.Frame):
 
     def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
+        super(ArtStation, self).__init__(*args, **kwargs)
+
         self.downloader = None
-
-        self.build_menu()
-        self.title("PickTrue 图站下载器(目前仅支持ArtStation)")
-
-        self.url = NamedInput(self, name="用户主页")
+        self.url = NamedInput(self, name="用户主页 ")
         self.save_path = FileBrowse(self)
 
         self.start_btn = ttk.Button(
+            self,
             text="开始下载",
             command=self.start_download,
         )
         self.stop_btn = ttk.Button(
+            self,
             text="停止下载",
             command=self.stop_download,
         )
@@ -138,20 +134,6 @@ class Downloader(tk.Tk):
             self.downloader.stop()
             self.downloader = None
 
-    @staticmethod
-    def show_about():
-        info("作者：https://github.com/winkidney/")
-
-    def build_menu(self):
-        menu = tk.Menu(self)
-        self.config(menu=menu)
-        main_menu = tk.Menu(menu)
-
-        # adds a command to the menu option, calling it exit, and the
-        # command it runs on event is client_exit
-        main_menu.add_command(label="关于", command=self.show_about)
-        menu.add_cascade(label="帮助", menu=main_menu)
-
     def start_update(self):
         run_as_thread(self._update_loop)
 
@@ -177,8 +159,34 @@ class Downloader(tk.Tk):
             self.status.set(msg)
 
 
+class App(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        super(App, self).__init__(*args, **kwargs)
+        self.tabs = ttk.Notebook(self)
+        self.title("PickTrue - 相册下载器")
+        self.build_menu()
+        self._art_station = ArtStation(self)
+        self.tabs.add(self._art_station, text='ArtStation')
+        self.tabs.pack()
+
+    @staticmethod
+    def show_about():
+        info("作者：https://github.com/winkidney/")
+
+    def build_menu(self):
+        menu = tk.Menu(self)
+        self.config(menu=menu)
+        main_menu = tk.Menu(menu)
+
+        # adds a command to the menu option, calling it exit, and the
+        # command it runs on event is client_exit
+        main_menu.add_command(label="关于", command=self.show_about)
+        menu.add_cascade(label="帮助", menu=main_menu)
+
+
 def run():
-    app = Downloader()
+    app = App()
     app.mainloop()
 
 
