@@ -1,8 +1,8 @@
 import os
 
-from pickture.engine import Downloader
+from picktrue.engine import Downloader
 
-from pickture.sites.artstation import ArtStation
+from picktrue.sites.artstation import ArtStation
 
 
 def art_station_run(url, path_prefix=None):

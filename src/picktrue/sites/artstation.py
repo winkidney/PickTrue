@@ -3,8 +3,8 @@ from urllib.parse import urljoin
 
 import requests
 
-from pickture.meta import ImageItem, UA
-from pickture.sites.abstract import DummySite
+from picktrue.meta import ImageItem, UA
+from picktrue.sites.abstract import DummySite
 
 
 BASE_URL = "https://www.artstation.com/"

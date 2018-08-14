@@ -4,8 +4,8 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox as msgbox
 
-from pickture.gui.entry import art_station_run
-from pickture.utils import run_as_thread
+from picktrue.gui.entry import art_station_run
+from picktrue.utils import run_as_thread
 
 
 def info(message, title="信息"):
@@ -169,7 +169,10 @@ class Downloader(tk.Tk):
         else:
             self.progress["value"] = self.downloader.counter.done
             self.progress['maximum'] = self.downloader.counter.total
-            self.status.set(self.downloader.counter.format())
+            msg = self.downloader.counter.format()
+            if self.downloader.done:
+                msg = msg + "  全部下载完毕，可以开始新的下载了：）"
+            self.status.set(msg)
 
 
 def run():

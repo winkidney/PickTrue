@@ -10,18 +10,18 @@ install_requires = (
 )
 
 setup(
-    name='pickture',
+    name='picktrue',
     version='0.0.1',
     packages=find_packages(HERE),
     install_requires=install_requires,
-    url='https://github.com/winkidney/pickture',
+    url='https://github.com/winkidney/picktrue',
     license='MIT',
     author='winkidney',
     author_email='winkidney@gmail.com',
     description='tools to download pictures you want',
     entry_points = {
         'console_scripts': [
-            'pickture-cli=pickture.__main__:main',
+            'picktrue-cli=picktrue.__main__:main',
         ]
     },
 )
