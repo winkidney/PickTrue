@@ -54,7 +54,6 @@ def mk_download_save_function(fetcher):
     :type fetcher: picktrue.sites.abstract.DummyFetcher
     """
 
-    @retry()
     def download_then_save(url, save_path):
         """
         :return True if download ok

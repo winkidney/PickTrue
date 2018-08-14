@@ -1,4 +1,5 @@
 import requests
+from picktrue.utils import retry
 
 
 class DummySite:
@@ -17,6 +18,7 @@ class DummyFetcher:
     def __init__(self):
         self.session = requests.session()
 
+    @retry()
     def get(self, url, **kwargs):
         """
         :rtype: requests.Response
