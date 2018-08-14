@@ -8,7 +8,8 @@ PickTure
 
 # 下载
 
-[windows-x64](https://github.com/winkidney/Pickture/releases)
++ [windows-x64](httms://github.com/winkidney/Pickture/releases)
++ [macOS](https://github.com/winkidney/Pickture/releases)
 
 Mac或者Linux请直接下载并安装Python项目即可，有打包需求再提.
 
