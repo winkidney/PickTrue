@@ -115,6 +115,7 @@ class Downloader:
         self.counter = Counter()
         self.done = False
         self._stop = False
+        self._all_task_add = False
         self.ensure_dir()
 
         def counter_wrapper(func):
@@ -161,6 +162,7 @@ class Downloader:
                     },
                 )
             )
+        self.all_task_add = True
 
     def _start_daemons(self):
         for worker in self._download_workers:
@@ -169,7 +171,8 @@ class Downloader:
     def join(self, background=False):
 
         def run():
-            self._download_queue.join()
+            while not self._all_task_add:
+                self._download_queue.join()
             self.done = True
 
         if background:
