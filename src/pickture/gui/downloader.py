@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox as msgbox
@@ -10,6 +11,9 @@ from pickture.utils import run_as_thread
 def info(message, title="信息"):
     msgbox.showinfo(title=title, message=message)
 
+
+def get_working_dir():
+    return os.getcwd()
 
 
 class StatusBar(tk.Frame):
@@ -64,7 +68,7 @@ class FileBrowse(tk.Frame):
         self.pack(fill=tk.X)
 
         self.label_text.set(
-            "."
+            get_working_dir()
         )
 
     def choose_file(self):
@@ -105,7 +109,7 @@ class Downloader(tk.Tk):
         self.progress = ttk.Progressbar(
             self,
             orient="horizontal",
-            length=400,
+            length=600,
             mode="determinate",
         )
         self.progress.pack(expand=1)
@@ -115,9 +119,9 @@ class Downloader(tk.Tk):
     def start_download(self):
         url = self.url.get_input()
         path_prefix = self.save_path.get_path()
-        if url is None:
-            return info("用户主页是必填")
-        if path_prefix is None:
+        if not url:
+            return info("用户主页是必填的")
+        if not path_prefix:
             return info("下载文件夹不能为空")
         if self.downloader is not None:
             if not self.downloader.done:
