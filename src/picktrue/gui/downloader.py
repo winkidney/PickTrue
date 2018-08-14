@@ -123,6 +123,8 @@ class Downloader(tk.Tk):
             return info("用户主页是必填的")
         if not path_prefix:
             return info("下载文件夹不能为空")
+        if not os.access(path_prefix, os.W_OK):
+            return info("对下载文件夹没有写权限，请重新选择")
         if self.downloader is not None:
             if not self.downloader.done:
                 return info("请停止后再重新点击下载...")
