@@ -16,7 +16,9 @@ class App(tk.Tk):
         self._hua_ban = HuaBan(self)
         self.tabs.add(self._art_station, text='ArtStation')
         self.tabs.add(self._hua_ban, text='花瓣网')
-        self.tabs.pack()
+        self.tabs.pack(
+            side=tk.LEFT,
+        )
 
     @staticmethod
     def show_about():
