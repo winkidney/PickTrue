@@ -20,8 +20,8 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 
 网址范例:
 
-+ https://www.artstation.com/braveking
-+ http://huaban.com/wmtzyzw1fl/
++ Artstation个人主页： https://www.artstation.com/braveking
++ 花瓣个人主页：http://huaban.com/wmtzyzw1fl/
 
 # 支持列表
 
@@ -30,7 +30,11 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 + 花瓣网
   + 个人页面 (按收藏者)
   + 按画板 (暂不支持) 
-  
+
+# 已知问题
+
++ 花瓣下载会丢失部分不一致的数据（比较罕见），原因是花瓣的网页能看到的图，在花瓣的API里面不存在，属于花瓣网的Bug，以后有精力会修复这个问题，基本不影响使用
+
 # 其他图站
 
 欢迎提出建议：）

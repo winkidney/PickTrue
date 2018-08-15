@@ -27,6 +27,7 @@ def art_station_run(url, path_prefix=None):
     site = ArtStation(url)
     return _user_home_run(site, path_prefix=path_prefix)
 
+
 def hua_ban_run(url, path_prefix=None):
     site = HuaBan(url)
     return _user_home_run(site=site, path_prefix=path_prefix)
