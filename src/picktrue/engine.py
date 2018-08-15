@@ -175,3 +175,9 @@ class Downloader:
 
         for worker in self._download_workers:
             worker.join()
+
+    def describe(self):
+        return "%s of %s downloaded" % (
+            self.counter.done,
+            self.counter.total,
+        )
