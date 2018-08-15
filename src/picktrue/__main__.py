@@ -1,5 +1,6 @@
 import click
 
+from picktrue.logger import download_logger
 from picktrue.sites.artstation import ArtStation
 from picktrue.sites.huaban import HuaBan
 from .engine import Downloader
@@ -21,15 +22,15 @@ def artstation_user(url):
     downloader.add_task(
         site.tasks
     )
-    print("All task add...waiting for execution...")
+    download_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        print("Exiting...Press crtl+c again to force quit")
+        download_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        print("All task done...Enjoy!")
+        download_logger.info("All task done...Enjoy!")
 
 
 @click.argument("url")
@@ -43,15 +44,15 @@ def huban_user(url):
     downloader.add_task(
         site.tasks
     )
-    print("All task add...waiting for execution...")
+    download_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        print("Exiting...Press crtl+c again to force quit")
+        download_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        print("All task done...Enjoy!")
+        download_logger.info("All task done...Enjoy!")
 
 
 def main():
