@@ -4,13 +4,16 @@ from picktrue.sites.artstation import ArtStation
 from .engine import Downloader
 
 
-@click.group('artstation')
-def artstation():
+@click.group('downloader')
+def entry():
     pass
 
 
 @click.argument("url")
-@artstation.command("user")
+@entry.command(
+    "artstation-user",
+    help='download from artstation user home page',
+)
 def artstation_user(url):
     site = ArtStation(url)
     downloader = Downloader(fetcher=site.fetcher, save_dir=site.dir_name)
@@ -29,7 +32,7 @@ def artstation_user(url):
 
 
 def main():
-    artstation()
+    entry()
 
 
 if __name__ == "__main__":
