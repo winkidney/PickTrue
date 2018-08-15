@@ -4,8 +4,8 @@ import time
 import tkinter as tk
 from tkinter import ttk
 
-from picktrue.gui.entry import art_station_run
-from picktrue.gui.toolkit import NamedInput, FileBrowse, StatusBar, info, ProgressBar
+from picktrue.gui.entry import art_station_run, hua_ban_run
+from picktrue.gui.toolkit import NamedInput, FileBrowse, StatusBar, info, ProgressBar, open_sys_explorer
 from picktrue.utils import run_as_thread
 
 
@@ -17,26 +17,51 @@ class UserHomeDownloader(tk.Frame):
         self.downloader = None
         self.url = NamedInput(self, name="用户主页 ")
         self.save_path = FileBrowse(self)
-
-        self.start_btn = ttk.Button(
-            self,
-            text="开始下载",
-            command=self.start_download,
-        )
-        self.stop_btn = ttk.Button(
-            self,
-            text="停止下载",
-            command=self.stop_download,
-        )
-        self.start_btn.pack(fill=tk.BOTH, expand=1)
-        self.stop_btn.pack(fill=tk.BOTH, expand=1)
-
+        self.btn_group = self.build_buttons()
         self.progress = ProgressBar(self)
         self.status = StatusBar(self)
         self.start_update()
 
     def run(self, url, path_prefix):
         raise NotImplementedError()
+
+    def build_buttons(self):
+        btn_args = dict(
+            height=1,
+        )
+        btn_group = tk.Frame(self)
+
+        btns = [
+            tk.Button(
+                btn_group,
+                text="开始下载",
+                command=self.start_download,
+                **btn_args
+            ),
+            tk.Button(
+                btn_group,
+                text="停止下载",
+                command=self.stop_download,
+                **btn_args,
+            ),
+            tk.Button(
+                btn_group,
+                text="打开下载文件夹",
+                command=self.open_download_folder,
+                **btn_args,
+            )
+        ]
+
+        for index, btn in enumerate(btns):
+            btn.pack(fill=tk.BOTH, expand=1)
+            btn.grid(column=index, row=0, sticky=tk.W)
+
+        btn_group.pack(fill=tk.BOTH, expand=1)
+        return btn_group
+
+    def open_download_folder(self):
+        path = self.save_path.get_path()
+        open_sys_explorer(path)
 
     def start_download(self):
         url = self.url.get_input()
@@ -91,7 +116,7 @@ class UserHomeDownloader(tk.Frame):
 class HuaBan(UserHomeDownloader):
 
     def run(self, url, path_prefix):
-        return art_station_run(
+        return hua_ban_run(
             url=url,
             path_prefix=path_prefix,
         )

@@ -1,4 +1,6 @@
 # coding: utf-8
+import platform
+
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox as msgbox, ttk
@@ -6,6 +8,17 @@ from tkinter import filedialog, messagebox as msgbox, ttk
 
 def info(message, title="信息"):
     msgbox.showinfo(title=title, message=message)
+
+
+def open_sys_explorer(path):
+    ptf = platform.system().lower()
+    if "darwin" in ptf:
+        return os.system('open %s' % path)
+    elif 'windows' in ptf:
+        return os.system('explorer %s' % path)
+    elif 'linux' in ptf:
+        return os.system('xdg-open %s' % path)
+    return info('平台不支持')
 
 
 def get_working_dir():
