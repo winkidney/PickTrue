@@ -1,12 +1,19 @@
 from collections import namedtuple
+from typing import NamedTuple
+
+# requires python >= 3.6.1
+class ImageItem(NamedTuple):
+    url: str
+    name: str
+    meta: dict = None
 
 
-ImageItem = namedtuple(
-    'ImageItem',
+DownloadTaskItem = namedtuple(
+    'TaskItem',
     (
-        'url',
-        'name',
-    ),
+        'image',
+        'base_save_path',
+    )
 )
 
 

@@ -10,7 +10,7 @@ def art_station_run(url, path_prefix=None):
     path = site.dir_name
     if path_prefix is not None:
         path = os.path.join(path_prefix, path)
-    downloader = Downloader(save_dir=path)
+    downloader = Downloader(save_dir=path, fetcher=site.fetcher)
     downloader.add_task(
         site.tasks,
         background=True,

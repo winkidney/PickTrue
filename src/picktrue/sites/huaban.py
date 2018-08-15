@@ -1,5 +1,6 @@
 import json
 import os
+
 import random
 import string
 from collections import namedtuple
@@ -24,7 +25,6 @@ Pin = namedtuple(
     (
         'url',
         'filename',
-        'file_to_save',
     )
 )
 
@@ -50,6 +50,27 @@ class HuaBanFetcher(DummyFetcher):
         if require_json:
             resp.json()
         return resp
+
+    @staticmethod
+    def ensure_dir(dir_path):
+        return os.makedirs(dir_path, exist_ok=True)
+
+    def save(self, content, task_item):
+        """
+        :type content: bytearray
+        :type task_item: picktrue.meta.TaskItem
+        """
+        image = task_item.image
+        save_path = os.path.join(
+            task_item.base_save_path,
+            image.meta['board_name'],
+        )
+        save_path = os.path.join(
+            save_path,
+            image.name,
+        )
+        with open(save_path, "wb") as f:
+            f.write(content)
 
 
 def _random_string(length):
@@ -99,65 +120,6 @@ def get_boards(user_meta):
         }
         boards.append(meta)
     return boards
-
-
-class User(object):
-    def __init__(self, user_url):
-        self.fetcher = HuaBanFetcher()
-        self.base_url = user_url
-        self.further_url_tpl = urljoin(
-            self.base_url,
-            "?{random_str}"
-            "&max={board_id}"
-            "&limit=10"
-            "&wfl=1"
-        )
-
-        self.username = None
-        self.board_count = None
-        self.pin_count = None
-        self._boards = []
-
-    def _fetch_home(self):
-        resp = self.fetcher.get(self.base_url, require_json=True)
-        user_meta = resp.json()['user']
-        self.username = user_meta['username']
-        self.board_count = user_meta['board_count']
-        self.pin_count = user_meta['pin_count']
-        return get_boards(user_meta)
-
-    def _fetch_further(self, prev_boards):
-        max_id = prev_boards[-1]['board_id']
-        further_url = self.further_url_tpl.format(
-            random_str=_random_string(8),
-            board_id=max_id,
-        )
-        resp = self.fetcher.get(
-            further_url,
-            require_json=True,
-        )
-        content = resp.json()
-        return get_boards(content['user'])
-
-    def _fetch_boards(self):
-        self._boards.extend(self._fetch_home())
-        while self.board_count > len(self._boards):
-            further_boards = self._fetch_further(self.boards)
-            self._boards.extend(further_boards)
-        return self._boards
-
-    @property
-    def boards(self):
-        if not self._boards:
-            self._fetch_boards()
-        return self._boards
-
-    def as_dict(self):
-        return {
-            "username": self.username,
-            "board_count": self.board_count,
-            "boards": self.boards,
-        }
 
 
 class Board(object):
@@ -210,21 +172,21 @@ class Board(object):
         content = resp.json()
         return get_pins(content['board'])
 
-    def fetch_pins(self):
+    def _fetch_pins(self):
         self._pins.extend(self._fetch_home())
-        yield self._pins
+        for pin in self._pins:
+            yield pin
         while self.pin_count > len(self._pins):
             further_pins = self._fetch_further(self._pins)
             if len(further_pins) <= 0:
                 break
             self._pins.extend(further_pins)
-            yield further_pins
+            for pin in further_pins:
+                yield pin
 
     @property
     def pins(self):
-        for pin_group in self.fetch_pins():
-            for pin in pin_group:
-                yield pin
+        yield from self._fetch_pins()
 
     def as_dict(self):
         return {
@@ -235,21 +197,76 @@ class Board(object):
         }
 
 
-def mk_pin(pin_meta, dir_to_save):
+def mk_pin(pin_meta):
     url = pin_meta["url"]
     filename = u"{title}.{ext}".format(
         title=pin_meta['pin_id'],
         ext=pin_meta['ext'],
     )
-    file_to_save = os.path.join(
-        dir_to_save,
-        filename,
-    )
     return Pin(
         url=url,
         filename=filename,
-        file_to_save=file_to_save
     )
+
+
+class User(object):
+    def __init__(self, user_url):
+        self.fetcher = HuaBanFetcher()
+        self.base_url = user_url
+        self.further_url_tpl = urljoin(
+            self.base_url,
+            "?{random_str}"
+            "&max={board_id}"
+            "&limit=10"
+            "&wfl=1"
+        )
+
+        self.username = None
+        self.board_count = None
+        self.pin_count = None
+        self._boards_metas = []
+
+    def _fetch_home(self):
+        resp = self.fetcher.get(self.base_url, require_json=True)
+        user_meta = resp.json()['user']
+        self.username = user_meta['username']
+        self.board_count = user_meta['board_count']
+        self.pin_count = user_meta['pin_count']
+        return get_boards(user_meta)
+
+    def _fetch_further(self, prev_boards):
+        max_id = prev_boards[-1]['board_id']
+        further_url = self.further_url_tpl.format(
+            random_str=_random_string(8),
+            board_id=max_id,
+        )
+        resp = self.fetcher.get(
+            further_url,
+            require_json=True,
+        )
+        content = resp.json()
+        return get_boards(content['user'])
+
+    def _fetch_boards(self):
+        self._boards_metas.extend(self._fetch_home())
+        while self.board_count > len(self._boards_metas):
+            further_boards = self._fetch_further(self._boards_metas)
+            self._boards_metas.extend(further_boards)
+            for meta in further_boards:
+                yield Board(meta['board_id'])
+    @property
+    def boards(self):
+        """
+        :rtype: iter[Board]
+        """
+        yield from self._fetch_boards()
+
+    def as_dict(self):
+        return {
+            "username": self.username,
+            "board_count": self.board_count,
+            "boards": self.boards,
+        }
 
 
 class HuaBan(DummySite):
@@ -262,23 +279,28 @@ class HuaBan(DummySite):
         self.user = User(user_url)
         self._boards = []
         self.parsed_pin_count = 0
-        self.fetch_initial_meta()
 
-    def fetch_initial_meta(self):
-        boards = self.user.boards
-        for meta in boards:
-            self._boards.append(Board(meta['board_id']))
+    @property
+    def dir_name(self):
+        return self.user.username
 
     @property
     def tasks(self):
-        for board, pin in self.boards_pins:
+        for board, pin_meta in self.boards_pins:
+            pin_item = mk_pin(
+                pin_meta
+            )
             yield ImageItem(
-                url=pin.url
+                url=pin_item.url,
+                name=pin_item.filename,
+                meta={
+                    'board_name': board.title,
+                }
             )
 
     @property
     def boards_pins(self):
-        for board in self._boards:
+        for board in self.user.boards:
             for pin in board.pins:
                 yield board, pin
 

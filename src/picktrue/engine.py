@@ -1,22 +1,19 @@
-from collections import namedtuple
+from typing import NamedTuple
+
 import os
 from queue import Queue, Empty
 from threading import Thread
 import time
 from functools import wraps
 
-import requests
-
 from picktrue.logger import download_logger
-from picktrue.utils import run_as_thread, retry
+from picktrue.meta import DownloadTaskItem
+from picktrue.utils import run_as_thread
 
-TaskItem = namedtuple(
-    'TaskItem',
-    (
-        'args',
-        'kwargs',
-    )
-)
+
+class WorkerTask(NamedTuple):
+    kwargs: dict = None
+    args: tuple = None
 
 
 class StoppableThread(Thread):
@@ -54,16 +51,16 @@ def mk_download_save_function(fetcher):
     :type fetcher: picktrue.sites.abstract.DummyFetcher
     """
 
-    def download_then_save(url, save_path):
+    def download_then_save(task_item):
         """
         :return True if download ok
+        :type task_item: picktrue.meta.TaskItem
         """
-        response = fetcher.get(url)
+        response = fetcher.get(task_item.image.url)
         if response is None:
-            download_logger.error("Failed to download image: %s" % url)
+            download_logger.error("Failed to download image: %s" % task_item.image.url)
             return
-        with open(save_path, "wb") as f:
-            f.write(response.content)
+        fetcher.save(response.content, task_item)
         return True
 
     return download_then_save
@@ -105,8 +102,8 @@ class Downloader:
         def counter_wrapper(func):
 
             @wraps(func)
-            def wrapped(*args, **kwargs):
-                ret = func(*args, **kwargs)
+            def wrapped(task_item):
+                ret = func(task_item=task_item)
                 self.counter.increment_done()
                 return ret
 
@@ -136,18 +133,20 @@ class Downloader:
         else:
             self._add_task(task_iter)
 
-    def _add_task(self, task_iter):
-        for task in task_iter:
+    def _add_task(self, image_iter):
+        for image in image_iter:
             if self._stop:
                 break
+            dti = DownloadTaskItem(
+                image=image,
+                base_save_path=self.save_dir,
+            )
             self.counter.increment_total()
             self._download_queue.put(
-                TaskItem(
-                    args=(),
+                WorkerTask(
                     kwargs={
-                        'url': task.url,
-                        'save_path': os.path.join(self.save_dir, task.name)
-                    },
+                        'task_item': dti,
+                    }
                 )
             )
         self._all_task_add = True
