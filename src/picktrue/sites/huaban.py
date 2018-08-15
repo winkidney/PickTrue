@@ -1,4 +1,6 @@
 import json
+from pprint import pformat
+
 import os
 
 import random
@@ -6,6 +8,7 @@ import string
 from collections import namedtuple
 from urllib.parse import urljoin
 
+from picktrue.logger import download_logger
 from picktrue.meta import ImageItem
 from picktrue.sites.abstract import DummySite, DummyFetcher
 from picktrue.utils import retry
@@ -65,6 +68,7 @@ class HuaBanFetcher(DummyFetcher):
             task_item.base_save_path,
             image.meta['board_name'],
         )
+        self.ensure_dir(dir_path=save_path)
         save_path = os.path.join(
             save_path,
             image.name,
@@ -145,6 +149,7 @@ class Board(object):
         self.title = None
         self.description = None
         self._pins = []
+        self._init_board()
 
     def _fetch_home(self):
         resp = self.fetcher.get(
@@ -158,7 +163,26 @@ class Board(object):
         self.description = board['description']
         return get_pins(board)
 
+    _init_board = _fetch_home
+
     def _fetch_further(self, prev_pins):
+        if len(prev_pins) == 0:
+            info = (
+                "prev_pins should not be [], "
+                "board: %s, "
+                "url: %s, "
+                "pin_count: %s, "
+                "current_pins: %s, "
+            )
+            download_logger.error(
+                info% (
+                    self.title,
+                    self.base_url,
+                    self.pin_count,
+                    pformat(self._pins),
+                )
+            )
+            return []
         max_id = prev_pins[-1]['pin_id']
         further_url = self.further_pin_url_tpl.format(
             pin_id=max_id,
@@ -173,6 +197,7 @@ class Board(object):
         return get_pins(content['board'])
 
     def _fetch_pins(self):
+        assert len(self._pins) == 0
         self._pins.extend(self._fetch_home())
         for pin in self._pins:
             yield pin
@@ -225,6 +250,7 @@ class User(object):
         self.board_count = None
         self.pin_count = None
         self._boards_metas = []
+        self._init_profile()
 
     def _fetch_home(self):
         resp = self.fetcher.get(self.base_url, require_json=True)
@@ -233,6 +259,8 @@ class User(object):
         self.board_count = user_meta['board_count']
         self.pin_count = user_meta['pin_count']
         return get_boards(user_meta)
+
+    _init_profile = _fetch_home
 
     def _fetch_further(self, prev_boards):
         max_id = prev_boards[-1]['board_id']
@@ -248,12 +276,14 @@ class User(object):
         return get_boards(content['user'])
 
     def _fetch_boards(self):
+        assert len(self._boards_metas) == 0
         self._boards_metas.extend(self._fetch_home())
         while self.board_count > len(self._boards_metas):
             further_boards = self._fetch_further(self._boards_metas)
             self._boards_metas.extend(further_boards)
             for meta in further_boards:
                 yield Board(meta['board_id'])
+
     @property
     def boards(self):
         """
