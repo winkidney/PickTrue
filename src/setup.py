@@ -22,6 +22,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'picktrue-cli=picktrue.__main__:main',
+            'picktrue-gui=picktrue.gui.__main__:main',
         ]
     },
 )
