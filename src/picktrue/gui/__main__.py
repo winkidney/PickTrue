@@ -1,8 +1,8 @@
 import tkinter as tk
+import webbrowser
 from tkinter import ttk
 
 from picktrue.gui.downloader import ArtStation, HuaBan
-from picktrue.gui.toolkit import info
 
 
 class App(tk.Tk):
@@ -21,18 +21,21 @@ class App(tk.Tk):
         )
 
     @staticmethod
+    def open_online_help():
+        url = 'https://github.com/winkidney/PickTrue'
+        webbrowser.open_new_tab(url)
+
+    @staticmethod
     def show_about():
-        info("作者：https://github.com/winkidney/")
+        webbrowser.open_new_tab(
+            'https://github.com/winkidney/'
+        )
 
     def build_menu(self):
-        menu = tk.Menu(self)
-        self.config(menu=menu)
-        main_menu = tk.Menu(menu)
-
-        # adds a command to the menu option, calling it exit, and the
-        # command it runs on event is client_exit
-        main_menu.add_command(label="关于", command=self.show_about)
-        menu.add_cascade(label="帮助", menu=main_menu)
+        main_menu = tk.Menu(self)
+        self.config(menu=main_menu)
+        main_menu.add_cascade(label="在线帮助", command=self.open_online_help)
+        main_menu.add_command(label="关于作者", command=self.show_about)
 
 
 def main():
