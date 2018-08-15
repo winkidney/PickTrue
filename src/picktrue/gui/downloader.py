@@ -53,8 +53,7 @@ class UserHomeDownloader(tk.Frame):
         ]
 
         for index, btn in enumerate(btns):
-            btn.pack(fill=tk.BOTH, expand=1)
-            btn.grid(column=index, row=0, sticky=tk.W)
+            btn.grid(column=index, row=0, sticky=tk.N)
 
         btn_group.pack(fill=tk.BOTH, expand=1)
         return btn_group
