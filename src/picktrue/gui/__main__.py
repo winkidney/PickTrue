@@ -33,10 +33,10 @@ class App(tk.Tk):
         menu.add_cascade(label="帮助", menu=main_menu)
 
 
-def run():
+def main():
     app = App()
     app.mainloop()
 
 
 if __name__ == "__main__":
-    run()
+    main()
