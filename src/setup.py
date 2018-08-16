@@ -7,6 +7,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 install_requires = (
     "requests",
     'click',
+    'pixivpy',
 )
 
 setup(

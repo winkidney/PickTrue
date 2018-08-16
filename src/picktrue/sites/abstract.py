@@ -6,7 +6,6 @@ from picktrue.utils import retry
 
 class DummySite:
 
-    @property
     def dir_name(self):
         raise NotImplementedError
 
