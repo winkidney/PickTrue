@@ -68,12 +68,7 @@ def huban_user(url):
     help='download from pixiv.net user home page',
 )
 def huban_user(member_id, username, password, proxy):
-    if proxy is not None:
-        proxy = {
-            'http': proxy,
-            'https': proxy,
-        }
-    site = Pixiv(member_id, username, password, proxies=proxy)
+    site = Pixiv(member_id, username, password, proxy=proxy)
     downloader = Downloader(fetcher=site.fetcher, save_dir=site.dir_name)
     downloader.add_task(
         site.tasks

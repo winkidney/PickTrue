@@ -46,6 +46,7 @@ class NamedInput(tk.Frame):
     def __init__(self, master=None, name=None, **kwargs):
         super(NamedInput, self).__init__(master=master, **kwargs)
         assert name is not None
+        self._name = name
         label = tk.Label(self, text=name)
         label.pack(side=tk.LEFT)
 
@@ -55,6 +56,45 @@ class NamedInput(tk.Frame):
 
     def get_input(self):
         return self.entry.get()
+
+    def assert_no_error(self):
+        text = self.get_input()
+        if not text:
+            info(
+                "%s 不能为空" % self._name
+            )
+
+
+class PasswordInput(tk.Frame):
+    def __init__(self, master=None, name=None, **kwargs):
+        super(PasswordInput, self).__init__(master=master, **kwargs)
+        assert name is not None
+        self._name = name
+        label = tk.Label(self, text=name)
+        label.pack(side=tk.LEFT)
+
+        self.entry = tk.Entry(self, show="*")
+        self.entry.pack(side=tk.LEFT, fill=tk.X, expand=1)
+        self.pack(fill=tk.X)
+
+    def get_input(self):
+        return self.entry.get()
+
+    def assert_no_error(self):
+        text = self.get_input()
+        if not text:
+            info(
+                "%s 不能为空" % self._name
+            )
+
+
+
+class ProxyInput(NamedInput):
+    def assert_no_error(self):
+        value = self.get_input()
+        results = [kw in value for kw in ('http', 'https', 'socks5')]
+        if not any(results):
+            info("代理地址错误")
 
 
 class FileBrowse(tk.Frame):
@@ -88,6 +128,12 @@ class FileBrowse(tk.Frame):
     def get_path(self):
         return self.label_text.get()
 
+    def assert_no_error(self):
+        text = self.get_path()
+        if not text:
+            info(
+                "%s 不能为空"
+            )
 
 class ProgressBar(ttk.Progressbar):
 

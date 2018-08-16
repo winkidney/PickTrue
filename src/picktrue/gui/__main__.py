@@ -2,7 +2,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
-from picktrue.gui.downloader import ArtStation, HuaBan
+from picktrue.gui.downloader import ArtStation, HuaBan, Pixiv
 from picktrue.gui.toolkit import info
 
 
@@ -15,8 +15,10 @@ class App(tk.Tk):
         self.build_menu()
         self._art_station = ArtStation(self)
         self._hua_ban = HuaBan(self)
+        self._pixiv = Pixiv(self)
         self.tabs.add(self._art_station, text='ArtStation')
         self.tabs.add(self._hua_ban, text='花瓣网')
+        self.tabs.add(self._pixiv, text='Pixiv')
         self.tabs.pack(
             side=tk.LEFT,
         )
