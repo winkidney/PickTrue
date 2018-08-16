@@ -63,6 +63,7 @@ class NamedInput(tk.Frame):
             info(
                 "%s 不能为空" % self._name
             )
+            raise ValueError("Proxy address error")
 
 
 class PasswordInput(tk.Frame):
@@ -86,15 +87,19 @@ class PasswordInput(tk.Frame):
             info(
                 "%s 不能为空" % self._name
             )
+            raise ValueError("Proxy address error")
 
 
 
 class ProxyInput(NamedInput):
     def assert_no_error(self):
         value = self.get_input()
+        if not value:
+            return
         results = [kw in value for kw in ('http', 'https', 'socks5')]
         if not any(results):
             info("代理地址错误")
+            raise ValueError("Proxy address error")
 
 
 class FileBrowse(tk.Frame):
@@ -134,6 +139,8 @@ class FileBrowse(tk.Frame):
             info(
                 "%s 不能为空"
             )
+            raise ValueError("Value should not be null")
+
 
 class ProgressBar(ttk.Progressbar):
 
