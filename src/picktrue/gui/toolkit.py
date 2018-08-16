@@ -63,7 +63,7 @@ class NamedInput(tk.Frame):
             info(
                 "%s 不能为空" % self._name
             )
-            raise ValueError("Proxy address error")
+            raise ValueError("value error, can't be null")
 
 
 class PasswordInput(tk.Frame):
@@ -87,8 +87,7 @@ class PasswordInput(tk.Frame):
             info(
                 "%s 不能为空" % self._name
             )
-            raise ValueError("Proxy address error")
-
+            raise ValueError("value error, can't be null")
 
 
 class ProxyInput(NamedInput):
@@ -157,7 +156,6 @@ class ProgressBar(ttk.Progressbar):
         self['value'] = current
         if maximum is not None:
             self['maximum'] = maximum
-
 
     def reset_progress(self):
         self.update_progress(0, 0)
