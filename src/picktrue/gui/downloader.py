@@ -4,7 +4,10 @@ import time
 import tkinter as tk
 
 from picktrue.gui.entry import art_station_run, hua_ban_run, pixiv_run
-from picktrue.gui.toolkit import NamedInput, FileBrowse, StatusBar, info, ProgressBar, open_sys_explorer, PasswordInput
+from picktrue.gui.toolkit import (
+    NamedInput, FileBrowse, StatusBar, info, ProgressBar, open_sys_explorer, PasswordInput,
+    ProxyInput
+)
 from picktrue.utils import run_as_thread
 
 
@@ -18,7 +21,7 @@ def mk_pixiv_inputs(master=None):
     url = NamedInput(master, name="要下载的用户主页地址")
     username = NamedInput(master, name="Pixiv账户名（需要登录才能下载）")
     password = PasswordInput(master, name="登录密码")
-    proxy = NamedInput(master, name="代理地址(支持http/https/socks5， 可不填)")
+    proxy = ProxyInput(master, name="代理地址(支持http/https/socks5， 可不填)")
     save_path = FileBrowse(master)
     return url, username, password, proxy, save_path
 
