@@ -43,6 +43,10 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 + Pinterest (暂无计划)
 + NHentai (暂无计划)
 
+# Bug反馈和使用交流
+
++ QQ群：863404640
+
 # 附图
 
 ## ArtStation
