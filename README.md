@@ -18,6 +18,16 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 
 # 用法
 
+## 支持列表和网址范例
+
++ ArtStation
+  + 个人页（按艺术家）： https://www.artstation.com/braveking
++ 花瓣网
+  + 个人页面 (按收藏者)： http://huaban.com/wmtzyzw1fl/
+  + 按画板 (暂不支持) 
++ Pixiv
+  + 个人主页（按作者）： https://www.pixiv.net/member.php?id=5031877
+
 ## 通用
 
 ![用法](res/usage.gif)
@@ -25,23 +35,6 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 ## Pixiv用法
 
 ![pixiv](res/pixiv.jpg)
-
-
-## 网址范例:
-
-+ Artstation个人主页： https://www.artstation.com/braveking
-+ 花瓣个人主页：http://huaban.com/wmtzyzw1fl/
-+ Pixiv（P站）个人主页：https://www.pixiv.net/member.php?id=5031877
-
-# 支持列表
-
-+ ArtStation
-  + 个人页（按艺术家）
-+ 花瓣网
-  + 个人页面 (按收藏者)
-  + 按画板 (暂不支持) 
-+ Pixiv
-  + 个人主页（按作者）
 
 
 # 已知问题
