@@ -8,6 +8,20 @@ from pixivpy3 import (
 )
 
 
+def normalize_proxy_string(proxy):
+    if 'socks5' in proxy:
+        if 'socks5h' not in proxy:
+            proxy = proxy.replace('socks5', 'socks5h')
+    return proxy
+
+
+def normalize_filename(filename):
+    filename = filename.replace("../", "_")
+    filename = filename.replace("..\\", "_")
+    filename = filename.replace("\\", "_")
+    return filename
+
+
 class PixivFetcher(DummyFetcher):
 
     def __init__(self, **kwargs):
@@ -20,16 +34,23 @@ class PixivFetcher(DummyFetcher):
 class Pixiv(DummySite):
 
     def __init__(self, url, username, password, proxy=None):
-        requests_kwargs = {}
+        proxies = {}
         if proxy is not None:
-            requests_kwargs['proxies'] = {
-                'http': proxy,
-                'https': proxy,
+            proxy = normalize_proxy_string(proxy)
+            proxies = {
+                'proxies': {
+                    'http': proxy,
+                    'https': proxy,
+                }
             }
+        requests_kwargs = {
+            "timeout": (3, 10),
+        }
+        requests_kwargs.update(proxies)
         self.api = AppPixivAPI(
             **requests_kwargs
         )
-        self._fetcher = PixivFetcher(**requests_kwargs)
+        self._fetcher = PixivFetcher(**proxies)
         self.api.login(username, password)
         self._user_id = int(re.findall('id=(\d+)', url)[0])
         self._dir_name = None
@@ -56,6 +77,7 @@ class Pixiv(DummySite):
                 str(user['id']),
             ]
         )
+        self._dir_name = normalize_filename(self._dir_name)
         self._total_illustrations = profile['profile']['total_illusts']
         return self.dir_name
 
@@ -65,7 +87,7 @@ class Pixiv(DummySite):
             for illustration in ret.illusts:
                 url = illustration['image_urls']['large']
                 file_name = '%s.%s' % (
-                    illustration['title'],
+                    illustration['id'],
                     url.split('.')[-1]
                 )
                 yield ImageItem(
