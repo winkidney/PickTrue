@@ -8,6 +8,7 @@ install_requires = (
     "requests",
     'click',
     'pixivpy',
+    'PySocks',
 )
 
 setup(

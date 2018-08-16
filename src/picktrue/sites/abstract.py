@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import os
 
 import requests
@@ -20,8 +21,10 @@ class DummySite:
 
 class DummyFetcher:
 
-    def __init__(self):
+    def __init__(self, proxies=None):
         self.session = requests.session()
+        if proxies is not None:
+            self.session.proxies = proxies
 
     @retry()
     def get(self, url, **kwargs):

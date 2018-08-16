@@ -55,14 +55,25 @@ def huban_user(url):
     else:
         download_logger.info("All task done...Enjoy!")
 
-
+@click.option(
+    '--proxy',
+    help="http/https/socks5 is supported",
+    default=None,
+)
 @click.argument("member-id")
+@click.argument("password")
+@click.argument("username")
 @entry.command(
     "pixiv-member",
     help='download from pixiv.net user home page',
 )
-def huban_user(member_id):
-    site = Pixiv(member_id, None, None)
+def huban_user(member_id, username, password, proxy):
+    if proxy is not None:
+        proxy = {
+            'http': proxy,
+            'https': proxy,
+        }
+    site = Pixiv(member_id, username, password, proxies=proxy)
     downloader = Downloader(fetcher=site.fetcher, save_dir=site.dir_name)
     downloader.add_task(
         site.tasks

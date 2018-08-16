@@ -8,8 +8,8 @@ from pixivpy3 import (
 
 class PixivFetcher(DummyFetcher):
 
-    def __init__(self):
-        super(PixivFetcher, self).__init__()
+    def __init__(self, **kwargs):
+        super(PixivFetcher, self).__init__(**kwargs)
         self.session.headers.update(
             {'Referer': 'http://www.pixiv.net/'}
         )
@@ -17,15 +17,23 @@ class PixivFetcher(DummyFetcher):
 
 class Pixiv(DummySite):
 
-    fetcher = PixivFetcher()
-
-    def __init__(self, user_id, username, password):
-        self.api = AppPixivAPI()
+    def __init__(self, user_id, username, password, proxies=None):
+        requests_kwargs = {}
+        if proxies is not None:
+            requests_kwargs['proxies'] = proxies
+        self.api = AppPixivAPI(
+            **requests_kwargs
+        )
+        self._fetcher = PixivFetcher(**requests_kwargs)
         self.api.login(username, password)
         self._user_id = user_id
         self.dir_name = None
         self._total_illustrations = 0
         self._fetch_user_detail()
+
+    @property
+    def fetcher(self):
+        return self._fetcher
 
     def _fetch_user_detail(self):
         profile = self.api.user_detail(self._user_id)
