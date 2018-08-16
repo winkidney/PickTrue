@@ -4,6 +4,7 @@ from picktrue.engine import Downloader
 
 from picktrue.sites.artstation import ArtStation
 from picktrue.sites.huaban import HuaBan
+from picktrue.sites.pixiv import Pixiv
 
 
 def _user_home_run(site, path_prefix=None):
@@ -31,3 +32,13 @@ def art_station_run(url, path_prefix=None):
 def hua_ban_run(url, path_prefix=None):
     site = HuaBan(url)
     return _user_home_run(site=site, path_prefix=path_prefix)
+
+
+def pixiv_run(url, username, password, proxy=None, path_prefix=None):
+    site = Pixiv(
+        url=url,
+        username=username,
+        password=password,
+        proxy=proxy,
+    )
+    return _user_home_run(site, path_prefix)

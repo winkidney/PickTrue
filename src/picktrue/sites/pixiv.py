@@ -1,3 +1,5 @@
+import re
+
 from picktrue.meta import ImageItem
 from picktrue.sites.abstract import DummySite, DummyFetcher
 
@@ -17,17 +19,20 @@ class PixivFetcher(DummyFetcher):
 
 class Pixiv(DummySite):
 
-    def __init__(self, user_id, username, password, proxies=None):
+    def __init__(self, url, username, password, proxy=None):
         requests_kwargs = {}
-        if proxies is not None:
-            requests_kwargs['proxies'] = proxies
+        if proxy is not None:
+            requests_kwargs['proxies'] = {
+                'http': proxy,
+                'https': proxy,
+            }
         self.api = AppPixivAPI(
             **requests_kwargs
         )
         self._fetcher = PixivFetcher(**requests_kwargs)
         self.api.login(username, password)
-        self._user_id = user_id
-        self.dir_name = None
+        self._user_id = int(re.findall('id=(\d+)', url)[0])
+        self._dir_name = None
         self._total_illustrations = 0
         self._fetch_user_detail()
 
@@ -35,10 +40,16 @@ class Pixiv(DummySite):
     def fetcher(self):
         return self._fetcher
 
+    @property
+    def dir_name(self):
+        assert self._dir_name is not None
+        return self._dir_name
+
     def _fetch_user_detail(self):
+        assert self._user_id is not None
         profile = self.api.user_detail(self._user_id)
         user = profile['user']
-        self.dir_name = "--".join(
+        self._dir_name = "-".join(
             [
                 user['name'],
                 user['account'],
