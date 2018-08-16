@@ -3,6 +3,7 @@ import webbrowser
 from tkinter import ttk
 
 from picktrue.gui.downloader import ArtStation, HuaBan
+from picktrue.gui.toolkit import info
 
 
 class App(tk.Tk):
@@ -28,14 +29,24 @@ class App(tk.Tk):
     @staticmethod
     def show_about():
         webbrowser.open_new_tab(
-            'https://github.com/winkidney/'
+            'https://winkidney.com'
+        )
+
+    @staticmethod
+    def contact():
+        info(
+            "任何问题或者建议请联系作者\n"
+            "用户QQ群： 863404640\n"
         )
 
     def build_menu(self):
-        main_menu = tk.Menu(self)
-        self.config(menu=main_menu)
-        main_menu.add_cascade(label="在线帮助", command=self.open_online_help)
-        main_menu.add_command(label="关于作者", command=self.show_about)
+        menu_bar = tk.Menu(self)
+        help_menu = tk.Menu(menu_bar)
+        help_menu.add_command(label="在线帮助", command=self.open_online_help)
+        help_menu.add_command(label="关于", command=self.show_about)
+        help_menu.add_command(label="联系作者/用户群", command=self.contact)
+        menu_bar.add_cascade(label="帮助", menu=help_menu)
+        self.config(menu=menu_bar)
 
 
 def main():
