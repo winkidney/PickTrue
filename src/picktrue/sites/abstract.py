@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import requests
 from picktrue.utils import retry
@@ -26,6 +27,10 @@ class DummyFetcher:
         if proxies is not None:
             self.session.proxies = proxies
 
+    @staticmethod
+    def _safe_path(path):
+        return Path(path).absolute()
+
     @retry()
     def get(self, url, **kwargs):
         """
@@ -45,5 +50,6 @@ class DummyFetcher:
             task_item.base_save_path,
             image.name,
         )
+        save_path = self._safe_path(save_path)
         with open(save_path, "wb") as f:
             f.write(content)

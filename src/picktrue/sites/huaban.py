@@ -73,6 +73,7 @@ class HuaBanFetcher(DummyFetcher):
             save_path,
             image.name,
         )
+        save_path = self._safe_path(save_path)
         with open(save_path, "wb") as f:
             f.write(content)
 
