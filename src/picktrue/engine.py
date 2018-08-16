@@ -158,6 +158,7 @@ class Downloader:
     def join(self, background=False):
 
         def run():
+            self._download_queue.join()
             while not self._all_task_add:
                 time.sleep(0.2)
                 self._download_queue.join()
