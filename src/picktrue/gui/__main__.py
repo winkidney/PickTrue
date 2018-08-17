@@ -2,7 +2,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
-from picktrue.gui.downloader import ArtStation, HuaBan, Pixiv
+from picktrue.gui.downloader import ArtStation, HuaBan, Pixiv, downloaders
 from picktrue.gui.toolkit import info
 
 
@@ -13,12 +13,9 @@ class App(tk.Tk):
         self.tabs = ttk.Notebook(self)
         self.title("PickTrue - 相册下载器")
         self.build_menu()
-        self._art_station = ArtStation(self)
-        self._hua_ban = HuaBan(self)
-        self._pixiv = Pixiv(self)
-        self.tabs.add(self._art_station, text='ArtStation')
-        self.tabs.add(self._hua_ban, text='花瓣网')
-        self.tabs.add(self._pixiv, text='Pixiv')
+
+        for downloader in downloaders:
+            self.tabs.add(downloader(self), text=downloader.title)
         self.tabs.pack(
             side=tk.LEFT,
         )

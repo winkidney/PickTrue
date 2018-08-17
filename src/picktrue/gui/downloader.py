@@ -3,7 +3,7 @@ import os
 import time
 import tkinter as tk
 
-from picktrue.gui.entry import art_station_run, hua_ban_run, pixiv_run
+from picktrue.gui.entry import art_station_run, hua_ban_run, pixiv_run, hua_ban_board_run
 from picktrue.gui.toolkit import (
     NamedInput, FileBrowse, StatusBar, info, ProgressBar, open_sys_explorer, PasswordInput,
     ProxyInput
@@ -11,14 +11,14 @@ from picktrue.gui.toolkit import (
 from picktrue.utils import run_as_thread
 
 
-def mk_normal_inputs(master=None, store_name=None):
-    url = NamedInput(master, name="用户主页 ")
+def mk_normal_inputs(master=None, store_name=None, user_home_name=None):
+    url = NamedInput(master, name=user_home_name or "用户主页地址 ")
     save_path = FileBrowse(master, store_name=store_name)
     return url, save_path
 
 
 def mk_pixiv_inputs(master=None):
-    url = NamedInput(master, name="要下载的用户主页地址")
+    url = NamedInput(master, name="用户主页地址")
     username = NamedInput(master, name="Pixiv账户名（需要登录才能下载）")
     password = PasswordInput(master, name="登录密码")
     proxy = ProxyInput(master, name="代理地址(支持http/https/socks5， 可不填)")
@@ -28,10 +28,15 @@ def mk_pixiv_inputs(master=None):
 
 class UserHomeDownloader(tk.Frame):
 
-    def __init__(self, *args, store_name=None, **kwargs):
+    title = "请更改此名字"
+
+    def __init__(self, *args, store_name=None, user_home_name=None, **kwargs):
         super(UserHomeDownloader, self).__init__(*args, **kwargs)
         self.downloader = None
-        self.url, self.save_path = mk_normal_inputs(self, store_name=store_name)
+        self.url, self.save_path = mk_normal_inputs(
+            self, store_name=store_name,
+            user_home_name=user_home_name,
+        )
         self.btn_group = self.build_buttons()
         self.progress = ProgressBar(self)
         self.status = StatusBar(self)
@@ -119,6 +124,8 @@ class UserHomeDownloader(tk.Frame):
 
 
 class Pixiv(tk.Frame):
+
+    title = "Pixiv(按画师)"
 
     def __init__(self, *args, **kwargs):
         super(Pixiv, self).__init__(*args, **kwargs)
@@ -222,6 +229,8 @@ class Pixiv(tk.Frame):
 
 class HuaBan(UserHomeDownloader):
 
+    title = "花瓣(按作者)"
+
     def __init__(self, *args, **kwargs):
         super(HuaBan, self).__init__(*args, store_name='huaban_save_path', **kwargs)
 
@@ -232,7 +241,28 @@ class HuaBan(UserHomeDownloader):
         )
 
 
+class HuaBanBoard(UserHomeDownloader):
+
+    title = "花瓣(按画板)"
+
+    def __init__(self, *args, **kwargs):
+        super(HuaBanBoard, self).__init__(
+            *args,
+            store_name='huaban_board_save_path',
+            user_home_name="画板地址",
+            **kwargs
+        )
+
+    def run(self, url, path_prefix):
+        return hua_ban_board_run(
+            url=url,
+            path_prefix=path_prefix,
+        )
+
+
 class ArtStation(UserHomeDownloader):
+
+    title = "ArtStation(按作者)"
 
     def __init__(self, *args, **kwargs):
         super(ArtStation, self).__init__(*args, store_name='artstation_save_path', **kwargs)
@@ -242,3 +272,16 @@ class ArtStation(UserHomeDownloader):
             url=url,
             path_prefix=path_prefix,
         )
+
+
+downloaders = [
+    ArtStation,
+    HuaBan,
+    HuaBanBoard,
+    Pixiv,
+]
+
+
+__all__ = (
+    "downloaders",
+)
