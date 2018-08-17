@@ -1,11 +1,13 @@
 PickTrue
 ------------
 
-强迫症怎么能看到喜欢的画师不收图~
+![logo](src/files/icon.png)
 
-画师赶紧构建自己的Visual Library吧~
+初衷是帮你备份自己的花瓣采集，以免哪天被和谐。
 
-花瓣用户可以备份自己的采集，以免哪天被和谐~
+强迫症可以收集喜爱画师的图。
+
+画师/设计师们也可以用来构建自己的Visual Library
 
 
 # 下载
@@ -15,7 +17,6 @@ PickTrue
 
 Linux请直接下载并安装Python项目即可，有打包需求再提
 
-
 # 用法
 
 ## 支持列表和网址范例
@@ -23,16 +24,18 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 + ArtStation
   + 个人页（按艺术家）： https://www.artstation.com/braveking
 + 花瓣网
-  + 个人页面 (按收藏者)： http://huaban.com/wmtzyzw1fl/
-  + 按画板 (暂不支持) 
+  + 个人页 (按收藏者)： http://huaban.com/wmtzyzw1fl/
+  + 按画板 ：http://huaban.com/boards/18720569/ 
 + Pixiv
-  + 个人主页（按作者）： https://www.pixiv.net/member.php?id=5031877
+  + 个人页（按作者，如果是漫画则会自动建立子文件夹）： https://www.pixiv.net/member.php?id=5031877
 
 ## 通用
 
 ![用法](res/usage.gif)
 
 ## Pixiv用法
+
+如果本身已经全局翻墙或者路由翻墙，可以不填写单独的代理地址
 
 ![pixiv](res/pixiv.jpg)
 
@@ -48,6 +51,10 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 
 + Pinterest (暂无计划)
 + NHentai (暂无计划)
+
+# 其他功能
+
++ 自动记录上次选择的保存路径
 
 # Bug反馈和使用交流
 
