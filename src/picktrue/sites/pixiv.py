@@ -1,3 +1,4 @@
+import os
 import re
 
 from picktrue.meta import ImageItem
@@ -15,11 +16,42 @@ def normalize_proxy_string(proxy):
     return proxy
 
 
+def guess_extension(image_url):
+    return image_url.split('.')[-1]
+
+
 def normalize_filename(filename):
     filename = filename.replace("../", "_")
     filename = filename.replace("..\\", "_")
     filename = filename.replace("\\", "_")
     return filename
+
+
+def parse_image_urls(illustration):
+    if 'original_image_url' in illustration['meta_single_page']:
+        url = illustration['meta_single_page']['original_image_url']
+        file_name = '%s.%s' % (
+            illustration['id'],
+            guess_extension(url)
+        )
+        yield ImageItem(
+            name=file_name,
+            url=url,
+        )
+    else:
+        dir_name = normalize_filename(illustration['title'])
+        images = illustration['meta_pages']
+        for index, image in enumerate(images):
+            url = image['image_urls']['original']
+            name = "%s.%s" % (index, guess_extension(url))
+            yield ImageItem(
+                name=name,
+                url=url,
+                meta={
+                    'is_comic': True,
+                    'dir_name': dir_name,
+                }
+            )
 
 
 class PixivFetcher(DummyFetcher):
@@ -29,6 +61,23 @@ class PixivFetcher(DummyFetcher):
         self.session.headers.update(
             {'Referer': 'http://www.pixiv.net/'}
         )
+
+    def save(self, content, task_item):
+        if task_item.image.meta is None:
+            return super(PixivFetcher, self).save(content, task_item)
+        image = task_item.image
+        save_path = os.path.join(
+            task_item.base_save_path,
+            image.meta['dir_name'],
+        )
+        os.makedirs(save_path, exist_ok=True)
+        save_path = self._safe_path(save_path)
+        save_path = os.path.join(
+            save_path,
+            image.name,
+        )
+        with open(save_path, "wb") as f:
+            f.write(content)
 
 
 class Pixiv(DummySite):
@@ -85,15 +134,7 @@ class Pixiv(DummySite):
         ret = self.api.user_illusts(self._user_id)
         while True:
             for illustration in ret.illusts:
-                url = illustration['image_urls']['large']
-                file_name = '%s.%s' % (
-                    illustration['id'],
-                    url.split('.')[-1]
-                )
-                yield ImageItem(
-                    name=file_name,
-                    url=url,
-                )
+                yield from parse_image_urls(illustration)
             if ret.next_url is None:
                 break
             ret = self.api.user_illusts(
