@@ -6,6 +6,8 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox as msgbox, ttk
 
+from picktrue.gui.config import ConfigStore
+
 
 def info(message, title="信息"):
     msgbox.showinfo(title=title, message=message)
@@ -25,6 +27,7 @@ def open_sys_explorer(path):
 
 def get_working_dir():
     return os.getcwd()
+
 
 
 class StatusBar(tk.Frame):
@@ -105,7 +108,7 @@ class ProxyInput(NamedInput):
 
 class FileBrowse(tk.Frame):
 
-    def __init__(self, master=None, **kwargs):
+    def __init__(self, master=None, store_name=None, **kwargs):
         super(FileBrowse, self).__init__(master=master, **kwargs)
         self.label_text = tk.StringVar()
         btn = tk.Button(self, text="下载到", command=self.choose_file)
@@ -119,8 +122,16 @@ class FileBrowse(tk.Frame):
         )
         self.pack(fill=tk.X)
 
+        self._store_name = store_name
+        if store_name is not None:
+            self._config = ConfigStore.from_config_file()
+            save_path = self._config.op_read_path(store_name) or get_working_dir()
+        else:
+            self._config = None
+            save_path = get_working_dir()
+
         self.label_text.set(
-            get_working_dir()
+            save_path
         )
 
     def choose_file(self):
@@ -129,7 +140,10 @@ class FileBrowse(tk.Frame):
         )
         if not path:
             return
-        self.label_text.set(path)
+        path = Path(path)
+        self.label_text.set(str(path))
+        if self._config is not None:
+            self._config.op_store_path(self._store_name, path)
 
     def get_path(self):
         return self.label_text.get()
