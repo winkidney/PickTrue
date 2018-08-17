@@ -45,3 +45,6 @@ class ConfigStore(AttrDict):
     def op_read_path(self, name):
         path = self.get(name, None)
         return Path(path) if path is not None else None
+
+
+config_store = ConfigStore.from_config_file()

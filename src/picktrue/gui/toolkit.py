@@ -6,7 +6,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox as msgbox, ttk
 
-from picktrue.gui.config import ConfigStore
+from picktrue.gui.config import ConfigStore, config_store
 
 
 def info(message, title="信息"):
@@ -124,7 +124,7 @@ class FileBrowse(tk.Frame):
 
         self._store_name = store_name
         if store_name is not None:
-            self._config = ConfigStore.from_config_file()
+            self._config = config_store
             save_path = self._config.op_read_path(store_name) or get_working_dir()
         else:
             self._config = None
