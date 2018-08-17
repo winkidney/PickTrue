@@ -3,7 +3,7 @@ import os
 from picktrue.engine import Downloader
 
 from picktrue.sites.artstation import ArtStation
-from picktrue.sites.huaban import HuaBan
+from picktrue.sites.huaban import HuaBan, HuaBanBoard
 from picktrue.sites.pixiv import Pixiv
 
 
@@ -31,6 +31,11 @@ def art_station_run(url, path_prefix=None):
 
 def hua_ban_run(url, path_prefix=None):
     site = HuaBan(url)
+    return _user_home_run(site=site, path_prefix=path_prefix)
+
+
+def hua_ban_board_run(url, path_prefix=None):
+    site = HuaBanBoard(url)
     return _user_home_run(site=site, path_prefix=path_prefix)
 
 
