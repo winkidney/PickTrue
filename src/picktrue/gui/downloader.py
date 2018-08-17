@@ -11,9 +11,9 @@ from picktrue.gui.toolkit import (
 from picktrue.utils import run_as_thread
 
 
-def mk_normal_inputs(master=None):
+def mk_normal_inputs(master=None, store_name=None):
     url = NamedInput(master, name="用户主页 ")
-    save_path = FileBrowse(master)
+    save_path = FileBrowse(master, store_name=store_name)
     return url, save_path
 
 
@@ -22,16 +22,16 @@ def mk_pixiv_inputs(master=None):
     username = NamedInput(master, name="Pixiv账户名（需要登录才能下载）")
     password = PasswordInput(master, name="登录密码")
     proxy = ProxyInput(master, name="代理地址(支持http/https/socks5， 可不填)")
-    save_path = FileBrowse(master)
+    save_path = FileBrowse(master, store_name="pixiv_save_path")
     return url, username, password, proxy, save_path
 
 
 class UserHomeDownloader(tk.Frame):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, store_name=None, **kwargs):
         super(UserHomeDownloader, self).__init__(*args, **kwargs)
         self.downloader = None
-        self.url, self.save_path = mk_normal_inputs(self)
+        self.url, self.save_path = mk_normal_inputs(self, store_name=store_name)
         self.btn_group = self.build_buttons()
         self.progress = ProgressBar(self)
         self.status = StatusBar(self)
@@ -125,7 +125,7 @@ class Pixiv(tk.Frame):
 
         self.downloader = None
         self.url, self.username, self.password, \
-        self.proxy, self.save_path = mk_pixiv_inputs(self)
+            self.proxy, self.save_path = mk_pixiv_inputs(self)
         self.btn_group = self.build_buttons()
         self.progress = ProgressBar(self)
         self.status = StatusBar(self)
@@ -222,13 +222,20 @@ class Pixiv(tk.Frame):
 
 class HuaBan(UserHomeDownloader):
 
+    def __init__(self, *args, **kwargs):
+        super(HuaBan, self).__init__(*args, store_name='huaban_save_path', **kwargs)
+
     def run(self, url, path_prefix):
         return hua_ban_run(
             url=url,
             path_prefix=path_prefix,
         )
 
+
 class ArtStation(UserHomeDownloader):
+
+    def __init__(self, *args, **kwargs):
+        super(ArtStation, self).__init__(*args, store_name='artstation_save_path', **kwargs)
 
     def run(self, url, path_prefix):
         return art_station_run(
