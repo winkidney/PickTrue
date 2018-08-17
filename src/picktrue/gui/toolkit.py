@@ -3,6 +3,7 @@ import platform
 
 import os
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox as msgbox, ttk
 
 
@@ -12,10 +13,11 @@ def info(message, title="信息"):
 
 def open_sys_explorer(path):
     ptf = platform.system().lower()
+    path = Path(path)
     if "darwin" in ptf:
         return os.system('open %s' % path)
     elif 'windows' in ptf:
-        return os.system('explorer %s' % path)
+        return os.system('explorer.exe "%s"' % path)
     elif 'linux' in ptf:
         return os.system('xdg-open %s' % path)
     return info('平台不支持')
