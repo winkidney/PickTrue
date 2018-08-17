@@ -1,4 +1,5 @@
 import json
+import re
 from pprint import pformat
 
 import os
@@ -63,6 +64,8 @@ class HuaBanFetcher(DummyFetcher):
         :type content: bytearray
         :type task_item: picktrue.meta.TaskItem
         """
+        if task_item.image.meta is None:
+            return super(HuaBanFetcher, self).save(content, task_item)
         image = task_item.image
         save_path = os.path.join(
             task_item.base_save_path,
@@ -129,14 +132,14 @@ def get_boards(user_meta):
 
 class Board(object):
     def __init__(self, board_url_or_id):
-        board_url_or_id = str(board_url_or_id)
+        board_id = str(board_url_or_id)
         self.fetcher = HuaBanFetcher()
         if "http" in board_url_or_id:
-            self.base_url = board_url_or_id
-        else:
-            self.base_url = "http://huaban.com/boards/{board_id}/".format(
-                board_id=board_url_or_id
-            )
+            board_id = re.findall(r'boards/(\d+)/', board_id)[0]
+        self.id = board_id
+        self.base_url = "http://huaban.com/boards/{board_id}/".format(
+            board_id=board_id,
+        )
         self.further_pin_url_tpl = urljoin(
             self.base_url,
             "?{random_string}"
@@ -309,7 +312,6 @@ class HuaBan(DummySite):
         self.base_url = user_url
         self.user = User(user_url)
         self._boards = []
-        self.parsed_pin_count = 0
 
     @property
     def dir_name(self):
@@ -317,7 +319,7 @@ class HuaBan(DummySite):
 
     @property
     def tasks(self):
-        for board, pin_meta in self.boards_pins:
+        for board, pin_meta in self._boards_pins:
             pin_item = mk_pin(
                 pin_meta
             )
@@ -330,7 +332,7 @@ class HuaBan(DummySite):
             )
 
     @property
-    def boards_pins(self):
+    def _boards_pins(self):
         for board in self.user.boards:
             for pin in board.pins:
                 yield board, pin
@@ -345,3 +347,29 @@ class HuaBan(DummySite):
     def save_meta(self, file_name):
         meta = self.as_dict()
         json.dump(meta, open(file_name, "wb"))
+
+
+class HuaBanBoard(DummySite):
+
+    fetcher = HuaBanFetcher()
+
+    def __init__(self, board_url):
+        self.base_url = board_url
+        self._board = Board(self.base_url)
+
+    @property
+    def dir_name(self):
+        return _safe_file_name(
+            "%s-%s" % (self._board.title, self._board.id)
+        )
+
+    @property
+    def tasks(self):
+        for pin_meta in self._board.pins:
+            pin_item = mk_pin(
+                pin_meta
+            )
+            yield ImageItem(
+                url=pin_item.url,
+                name=pin_item.filename,
+            )

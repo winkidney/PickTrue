@@ -3,7 +3,7 @@ from picktrue.sites.pixiv import Pixiv
 
 from picktrue.logger import download_logger
 from picktrue.sites.artstation import ArtStation
-from picktrue.sites.huaban import HuaBan
+from picktrue.sites.huaban import HuaBan, HuaBanBoard
 from .engine import Downloader
 
 
@@ -54,6 +54,29 @@ def huban_user(url):
         exit(0)
     else:
         download_logger.info("All task done...Enjoy!")
+
+
+@click.argument("url")
+@entry.command(
+    "huaban-board",
+    help='download from huaban.com specified board page',
+)
+def huban_board(url):
+    site = HuaBanBoard(url)
+    downloader = Downloader(fetcher=site.fetcher, save_dir=site.dir_name)
+    downloader.add_task(
+        site.tasks
+    )
+    download_logger.info("All task add...waiting for execution...")
+    try:
+        downloader.join()
+    except KeyboardInterrupt:
+        download_logger.warn("Exiting...Press crtl+c again to force quit")
+        downloader.stop()
+        exit(0)
+    else:
+        download_logger.info("All task done...Enjoy!")
+
 
 @click.option(
     '--proxy',
