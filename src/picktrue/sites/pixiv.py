@@ -30,6 +30,10 @@ def normalize_filename(filename):
 def parse_image_urls(illustration):
     if 'original_image_url' in illustration['meta_single_page']:
         url = illustration['meta_single_page']['original_image_url']
+        if illustration['type'] == 'ugoira':
+            url = url.replace("img-original", 'img-zip-ugoira')
+            url = re.findall('(.*)_ugoira0\..*', url)[0]
+            url = "%s%s" % (url, '_ugoira1920x1080.zip')
         file_name = '%s.%s' % (
             illustration['id'],
             guess_extension(url)
