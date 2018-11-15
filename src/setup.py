@@ -13,7 +13,7 @@ install_requires = (
 
 setup(
     name='picktrue',
-    version='0.3.3',
+    version='0.3.4',
     packages=find_packages(HERE),
     install_requires=install_requires,
     url='https://github.com/winkidney/picktrue',
