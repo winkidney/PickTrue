@@ -18,8 +18,8 @@ def get_name_from_url(img_url: str):
     )[-1]
     file_name = file_name.split('?')[:-1]
     file_name = '?'.join(file_name)
-    name_prefix = str(uuid.uuid4().hex)
-    return "-".join([name_prefix, file_name])
+    name_postfix = str(uuid.uuid4().hex)
+    return "-".join([file_name, name_postfix])
 
 
 def parse_single_artwork(artwork_dict: dict):
