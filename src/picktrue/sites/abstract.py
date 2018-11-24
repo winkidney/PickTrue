@@ -46,10 +46,15 @@ class DummyFetcher:
         :type task_item: picktrue.meta.TaskItem
         """
         image = task_item.image
+        image_name = image.name
+        if callable(image.name):
+            image_name = image.name(image.url, content)
         save_path = os.path.join(
             task_item.base_save_path,
-            image.name,
+            image_name,
         )
         save_path = self._safe_path(save_path)
+        if os.path.exists(save_path):
+            return
         with open(save_path, "wb") as f:
             f.write(content)

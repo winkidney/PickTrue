@@ -1,3 +1,4 @@
+import hashlib
 import time
 import uuid
 from urllib.parse import urljoin
@@ -12,13 +13,19 @@ PROJECT_URL_TPL = '/users/{user_id}/projects.json?page={page}'
 DETAIL_URL_TPL = '/projects/{hash_id}.json'
 
 
-def get_name_from_url(img_url: str):
+def _get_file_hash(file_content):
+    m = hashlib.md5()
+    m.update(file_content)
+    return m.digest().hex()
+
+
+def get_name_from_url(img_url: str, file_content):
     file_name = img_url.split(
         '/'
     )[-1]
     file_name = file_name.split('?')[:-1]
     file_name = '?'.join(file_name)
-    name_postfix = str(uuid.uuid4().hex)
+    name_postfix = _get_file_hash(file_content)
     name = file_name.split('.')[:-1]
     name = ".".join(name)
     ext = file_name.split('.')[-1]
@@ -133,7 +140,7 @@ def parse_single_artwork(artwork_dict: dict):
     images = (
         ImageItem(
             url=asset['image_url'],
-            name=get_name_from_url(asset['image_url']),
+            name=get_name_from_url,
         )
         for asset in assets
     )

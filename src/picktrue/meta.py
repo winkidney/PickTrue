@@ -1,10 +1,11 @@
 from collections import namedtuple
 from typing import NamedTuple
 
+
 # requires python >= 3.6.1
 class ImageItem(NamedTuple):
     url: str
-    name: str
+    name: str or function
     meta: dict = None
 
 
