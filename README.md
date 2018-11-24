@@ -56,6 +56,10 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 
 + 自动记录上次选择的保存路径
 
+# 更新日志
+
+参见 `release` 页，https://github.com/winkidney/PickTrue/releases
+
 # Bug反馈和使用交流
 
 + QQ群：863404640
