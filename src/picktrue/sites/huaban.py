@@ -15,6 +15,8 @@ from picktrue.sites.abstract import DummySite, DummyFetcher
 from picktrue.utils import retry
 
 IMAGE_URL_TPL = "http://img.hb.aicdn.com/{file_key}"
+BASE_URL = "http://huabanpro.com"
+
 XHR_HEADERS = {
     "X-Requested-With": "XMLHttpRequest",
     "User-Agent":
@@ -134,12 +136,13 @@ class Board(object):
     def __init__(self, board_url_or_id):
         board_id = str(board_url_or_id)
         self.fetcher = HuaBanFetcher()
-        if "http" in board_url_or_id:
+        if "http" in board_id:
             board_id = re.findall(r'boards/(\d+)/', board_id)[0]
         self.id = board_id
-        self.base_url = "http://huaban.com/boards/{board_id}/".format(
+        path = "/boards/{board_id}/".format(
             board_id=board_id,
         )
+        self.base_url = urljoin(BASE_URL, path)
         self.further_pin_url_tpl = urljoin(
             self.base_url,
             "?{random_string}"
