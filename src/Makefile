@@ -3,3 +3,5 @@ build-osx:
 clean:
 	rm -fr ./build
 	rm -fr ./dist
+gui:
+	python -m picktrue.gui
