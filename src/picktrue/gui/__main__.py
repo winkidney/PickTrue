@@ -2,7 +2,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
-from picktrue.gui.downloader import ArtStation, HuaBan, Pixiv, downloaders
+from picktrue.gui.downloader import downloaders
 from picktrue.gui.toolkit import info
 
 
