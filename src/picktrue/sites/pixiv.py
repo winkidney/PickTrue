@@ -2,18 +2,11 @@ import os
 import re
 
 from picktrue.meta import ImageItem
-from picktrue.sites.abstract import DummySite, DummyFetcher
+from picktrue.sites.abstract import DummySite, DummyFetcher, get_proxy
 
 from pixivpy3 import (
     AppPixivAPI
 )
-
-
-def normalize_proxy_string(proxy):
-    if 'socks5' in proxy:
-        if 'socks5h' not in proxy:
-            proxy = proxy.replace('socks5', 'socks5h')
-    return proxy
 
 
 def guess_extension(image_url):
@@ -87,15 +80,7 @@ class PixivFetcher(DummyFetcher):
 class Pixiv(DummySite):
 
     def __init__(self, url, username, password, proxy=None):
-        proxies = {}
-        if proxy is not None:
-            proxy = normalize_proxy_string(proxy)
-            proxies = {
-                'proxies': {
-                    'http': proxy,
-                    'https': proxy,
-                }
-            }
+        proxies = get_proxy(proxy)
         requests_kwargs = {
             "timeout": (3, 10),
         }

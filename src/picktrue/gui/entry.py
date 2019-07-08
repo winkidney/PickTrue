@@ -24,8 +24,8 @@ def _user_home_run(site, path_prefix=None):
     return downloader
 
 
-def art_station_run(url, path_prefix=None):
-    site = ArtStation(url)
+def art_station_run(url, path_prefix=None, proxy=None):
+    site = ArtStation(url, proxy=proxy)
     return _user_home_run(site, path_prefix=path_prefix)
 
 

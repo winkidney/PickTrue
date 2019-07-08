@@ -2,7 +2,29 @@ import os
 from pathlib import Path
 
 import requests
+
+from picktrue.meta import UA
 from picktrue.utils import retry
+
+
+def normalize_proxy_string(proxy):
+    if 'socks5' in proxy:
+        if 'socks5h' not in proxy:
+            proxy = proxy.replace('socks5', 'socks5h')
+    return proxy
+
+
+def get_proxy(proxy_string=None):
+    if proxy_string is None:
+        return {}
+    proxy = normalize_proxy_string(proxy_string)
+    proxies = {
+        'proxies': {
+            'http': proxy,
+            'https': proxy,
+        }
+    }
+    return proxies
 
 
 class DummySite:
@@ -26,6 +48,7 @@ class DummyFetcher:
         self.session = requests.session()
         if proxies is not None:
             self.session.proxies = proxies
+        self.session.headers.update(UA)
 
     @staticmethod
     def _safe_path(path):

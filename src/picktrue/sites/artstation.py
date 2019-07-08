@@ -1,12 +1,12 @@
 import hashlib
 import time
-import uuid
 from urllib.parse import urljoin
 
 import requests
 
 from picktrue.meta import ImageItem, UA
-from picktrue.sites.abstract import DummySite, DummyFetcher
+from picktrue.sites.abstract import DummySite, DummyFetcher, get_proxy
+
 
 BASE_URL = "https://www.artstation.com/"
 PROJECT_URL_TPL = '/users/{user_id}/projects.json?page={page}'
@@ -208,12 +208,12 @@ def get_project_page_url(user_id, page=1):
     return url
 
 
-def get_single_page(user_id, page=1):
+def get_single_page(user_id, page=1, proxies=None):
     initial_url = get_project_page_url(
         user_id=user_id,
         page=page,
     )
-    resp = requests.get(initial_url, headers=UA)
+    resp = requests.get(initial_url, headers=UA, proxies=proxies)
     resp = resp.json()
     assert 'total_count' in resp
     total_count = resp['total_count']
@@ -232,24 +232,28 @@ class ArtStation(DummySite):
     True
     """
 
-    fetcher = DummyFetcher()
-
-    def __init__(self, user_url: str):
+    def __init__(self, user_url: str, proxy=None):
         self._tasks = None
         self.url = user_url
         assert user_url.startswith(BASE_URL)
         self.user_id = user_url.replace(BASE_URL, '')
+        self._proxies = get_proxy(proxy)
+        self._fetcher = DummyFetcher(**self._proxies)
+
+    @property
+    def fetcher(self):
+        return self._fetcher
 
     @property
     def dir_name(self):
         return self.user_id
 
-    @staticmethod
-    def _get_image_item_from_detail(artwork_summary):
+    def _get_image_item_from_detail(self, artwork_summary):
         summary_url = parse_artwork_url(artwork_summary)
         resp = requests.get(
             summary_url,
             headers=UA,
+            **self._proxies,
         )
         resp = resp.json()
         return parse_single_artwork(resp)
@@ -265,7 +269,8 @@ class ArtStation(DummySite):
         page = 1
         total_count, current_count, data = get_single_page(
             self.user_id,
-            page=page
+            page=page,
+            **self._proxies,
         )
         yield from self._yield_image_items(data)
         while has_next_page(current_count, total_count):

@@ -37,10 +37,15 @@ class UserHomeDownloader(tk.Frame):
             self, store_name=store_name,
             user_home_name=user_home_name,
         )
+        for attr_name, value in self.user_inputs().items():
+            setattr(self, attr_name, value)
         self.btn_group = self.build_buttons()
         self.progress = ProgressBar(self)
         self.status = StatusBar(self)
         self.start_update()
+
+    def user_inputs(self):
+        return {}
 
     def run(self, url, path_prefix):
         raise NotImplementedError()
@@ -264,13 +269,36 @@ class ArtStation(UserHomeDownloader):
 
     title = "ArtStation(按作者)"
 
-    def __init__(self, *args, **kwargs):
-        super(ArtStation, self).__init__(*args, store_name='artstation_save_path', **kwargs)
+    def user_inputs(self):
+        return {
+            'proxy': ProxyInput(master=self, name="代理地址(支持http/https/socks5， 可不填)"),
+        }
 
-    def run(self, url, path_prefix):
+    def start_download(self):
+        self.url.assert_no_error()
+        self.save_path.assert_no_error()
+        self.proxy.assert_no_error()
+
+        url = self.url.get_input()
+        path_prefix = self.save_path.get_path()
+        proxy = self.proxy.get_input()
+
+        if not os.access(path_prefix, os.W_OK):
+            return info("对下载文件夹没有写权限，请重新选择")
+        if self.downloader is not None:
+            if not self.downloader.done:
+                return info("请停止后再重新点击下载...")
+        self.downloader = self.run(
+            url=url,
+            path_prefix=path_prefix,
+            proxy=proxy,
+        )
+
+    def run(self, url, path_prefix, proxy):
         return art_station_run(
             url=url,
             path_prefix=path_prefix,
+            proxy=proxy,
         )
 
 

@@ -13,12 +13,13 @@ def entry():
 
 
 @click.argument("url")
+@click.option("--proxy", default=None, type=click.STRING)
 @entry.command(
     "artstation-user",
     help='download from artstation user home page',
 )
-def artstation_user(url):
-    site = ArtStation(url)
+def artstation_user(url, proxy):
+    site = ArtStation(url, proxy=proxy)
     downloader = Downloader(fetcher=site.fetcher, save_dir=site.dir_name)
     downloader.add_task(
         site.tasks
