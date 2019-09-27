@@ -9,6 +9,7 @@ install_requires = (
     'click',
     'pixivpy',
     'PySocks',
+    'flask',
 )
 
 setup(

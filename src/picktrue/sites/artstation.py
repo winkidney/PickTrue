@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import requests
 
 from picktrue.meta import ImageItem, UA
+from picktrue.rpc.taskserver import server
 from picktrue.sites.abstract import DummySite, DummyFetcher, get_proxy
 
 
@@ -208,21 +209,84 @@ def get_project_page_url(user_id, page=1):
     return url
 
 
-def get_single_page(user_id, page=1, proxies=None):
-    initial_url = get_project_page_url(
-        user_id=user_id,
-        page=page,
-    )
-    resp = requests.get(initial_url, headers=UA, proxies=proxies)
-    resp = resp.json()
-    assert 'total_count' in resp
-    total_count = resp['total_count']
-    data_count = len(resp['data'])
-    return total_count, data_count, resp['data']
-
-
 def has_next_page(current_count, total_count):
     return current_count < total_count
+
+
+class BaseMetaFetcher:
+    def request_url(self, url):
+        raise NotImplementedError
+
+    def get_artwork_summery(self, summary_url):
+        return self.request_url(summary_url)
+
+    def get_single_page(self, user_id, page):
+        initial_url = get_project_page_url(
+            user_id=user_id,
+            page=page,
+        )
+        resp = self.request_url(initial_url)
+        print(resp.keys())
+        assert 'total_count' in resp
+        total_count = resp['total_count']
+        data_count = len(resp['data'])
+        return total_count, data_count, resp['data']
+
+
+class LocalMetaFetcher(BaseMetaFetcher):
+    def __init__(self, proxies):
+        self._proxies = proxies
+
+    def request_url(self, url):
+        resp = requests.get(url, headers=UA, proxies=self._proxies)
+        return resp.json()
+
+
+class BrowserMetaFetcher(BaseMetaFetcher):
+    def __init__(self):
+        self.server = server
+        self.server.start()
+
+    def request_url(self, url):
+        return self.server.requester.send_and_wait(url)
+
+
+class TaskMaker:
+    def __init__(self, user_id, meta_fetcher: BaseMetaFetcher):
+        self.user_id = user_id
+        self.meta = meta_fetcher
+
+    def __call__(self, *args, **kwargs):
+        yield from self._gen_tasks()
+
+    def _get_image_item_from_detail(self, artwork_summary):
+        summary_url = parse_artwork_url(artwork_summary)
+        resp = self.meta.get_artwork_summery(summary_url)
+        return parse_single_artwork(resp)
+
+    def _yield_image_items(self, data):
+        for summary in data:
+            for image_item in self._get_image_item_from_detail(
+                summary,
+            ):
+                yield image_item
+
+    def _gen_tasks(self):
+        page = 1
+        total_count, current_count, data = self.meta.get_single_page(
+            self.user_id,
+            page,
+        )
+        yield from self._yield_image_items(data)
+        while has_next_page(current_count, total_count):
+            page += 1
+            _, count_delta, data = self.meta.get_single_page(
+                self.user_id,
+                page=page,
+            )
+            current_count += count_delta
+            yield from self._yield_image_items(data)
+            time.sleep(0.2)
 
 
 class ArtStation(DummySite):
@@ -239,6 +303,10 @@ class ArtStation(DummySite):
         self.user_id = user_url.replace(BASE_URL, '')
         self._proxies = get_proxy(proxy)
         self._fetcher = DummyFetcher(**self._proxies)
+        self._task_maker = TaskMaker(
+            user_id=self.user_id,
+            meta_fetcher=BrowserMetaFetcher(),
+        )
 
     @property
     def fetcher(self):
@@ -248,44 +316,9 @@ class ArtStation(DummySite):
     def dir_name(self):
         return self.user_id
 
-    def _get_image_item_from_detail(self, artwork_summary):
-        summary_url = parse_artwork_url(artwork_summary)
-        resp = requests.get(
-            summary_url,
-            headers=UA,
-            **self._proxies,
-        )
-        resp = resp.json()
-        return parse_single_artwork(resp)
-
-    def _yield_image_items(self, data):
-        for summary in data:
-            for image_item in self._get_image_item_from_detail(
-                summary,
-            ):
-                yield image_item
-
-    def _gen_tasks(self):
-        page = 1
-        total_count, current_count, data = get_single_page(
-            self.user_id,
-            page=page,
-            **self._proxies,
-        )
-        yield from self._yield_image_items(data)
-        while has_next_page(current_count, total_count):
-            page += 1
-            _, count_delta, data = get_single_page(
-                self.user_id,
-                page=page,
-            )
-            current_count += count_delta
-            yield from self._yield_image_items(data)
-            time.sleep(0.2)
-
     @property
     def tasks(self):
-        yield from self._gen_tasks()
+        yield from self._task_maker()
 
 
 if __name__ == "__main__":
