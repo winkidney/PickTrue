@@ -31,7 +31,17 @@ class TaskServer:
         t.setDaemon(True)
         t.start()
 
+    def is_running(self):
+        if self._thread is None:
+            return False
+        if not self._thread.is_alive():
+            return False
+        return True
+
     def start(self):
+        if self.is_running():
+            return False
+
         def run():
             app.run(debug=True, port=2333, use_reloader=False)
 
@@ -65,7 +75,6 @@ def task_submit():
 
 
 if __name__ == '__main__':
-    server = TaskServer()
     server.start()
     # server.start_debug_task()
     import pdb;pdb.set_trace()

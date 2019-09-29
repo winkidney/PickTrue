@@ -243,8 +243,9 @@ class LocalMetaFetcher(BaseMetaFetcher):
 
 
 class BrowserMetaFetcher(BaseMetaFetcher):
+    server = server
+
     def __init__(self):
-        self.server = server
         self.server.start()
 
     def request_url(self, url):
