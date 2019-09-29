@@ -1,10 +1,14 @@
 // ==UserScript==
 // @name PickTrueBrowser
-// @namespace Violentmonkey Scripts
+// @author winkidney@gmail.com
+// @version 0.0.1
+// @namespace tools
+// @description A tool to get meta info form ArtStation within browser to provide downloading service.
 // @match *://www.artstation.com/*
 // @grant GM_xmlhttpRequest
-// @require https://cdn.bootcss.com/axios/0.19.0/axios.min.js
-// @run-at          context-menu
+// @require https://code.jquery.com/jquery-1.12.4.min.js
+// @run-at context-menu
+// @updateURL https://github.com/winkidney/PickTrue/raw/master/artstation.user.js
 // ==/UserScript==
 
 let logger = {
