@@ -95,7 +95,7 @@ function setUpContextMenu(entryFn) {
   if (html.hasAttribute("contextmenu")) {
     // We don't want to override web page context menu if any
     var contextmenu = $("#" + html.getAttribute("contextmenu"));
-    contextmenu.appendChild(menu); // Append to web page context menu
+    contextmenu[0].appendChild(menu); // Append to web page context menu
   } else {
     html.setAttribute("contextmenu", "userscript-picktrue-context-menu");
   }
