@@ -10,6 +10,14 @@
 // @run-at context-menu
 // @updateURL https://github.com/winkidney/PickTrue/raw/master/artstation.user.js
 // ==/UserScript==
+let utils = {
+  isFirefox: function () {
+    return (navigator.userAgent.indexOf("Firefox") !== -1)
+  },
+  isChrome: function () {
+    return (navigator.userAgent.indexOf("Chrome") !== -1)
+  }
+};
 
 let logger = {
   info: function(...args) {
@@ -84,12 +92,12 @@ let RequestProxy = function () {
 };
 
 function entry() {
-  // alert("请确保已经启动了PickTrue客户端。将要解析当前用户的所有图集并将下载地址发送PickTrue下载器，确认后将立即开始。");
+  alert("请确保已经启动了PickTrue客户端。将要解析当前用户的所有图集并将下载地址发送PickTrue下载器，确认后将立即开始。");
   let proxy = RequestProxy();
   proxy.getTask();
 }
 
-function setUpContextMenu(entryFn) {
+function _setUpContextMenuFirefox(entryFn) {
   var menu = document.body.appendChild(document.createElement("menu"));
   var html = document.documentElement;
   if (html.hasAttribute("contextmenu")) {
@@ -110,6 +118,24 @@ function setUpContextMenu(entryFn) {
   if ("contextMenu" in html && "HTMLMenuItemElement" in window) {
     var menuitem = $("#userscript-picktrue-menuitem")[0];
     menuitem.addEventListener("click", entryFn, false);
+  }
+}
+
+function _setUpContextMenuChrome(entryFn) {
+  $(document).on("contextmenu", function (e) {
+    if (e.ctrlKey){
+      entryFn()
+    }
+  });
+}
+
+function setUpContextMenu(entryFn) {
+  if (utils.isFirefox()) {
+    _setUpContextMenuFirefox(entryFn);
+  } else if (utils.isChrome()) {
+    _setUpContextMenuChrome(entryFn);
+  } else {
+    alert("Unsupported browser " + navigator.userAgent);
   }
 }
 
