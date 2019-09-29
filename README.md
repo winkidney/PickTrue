@@ -18,7 +18,9 @@ PickTrue
 Linux请直接下载并安装Python项目即可，有打包需求再提
 
 + [适用于Artstation的油猴脚本](https://greasyfork.org/zh-CN/scripts/390597-picktruebrowser)
-+ [推荐使用的油猴脚本插件](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/?src=search)
++ 推荐使用的油猴脚本插件（其他的不推荐，理由很多，不详细叙述啦），不推荐的插件可能也能运行，但我没有测试
+  + [火狐的ViolentMonkey](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/?src=search)
+  + [Chrome的ViolentMonkey](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 
 # 用法
 
@@ -50,7 +52,8 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 3. 打开浏览器，访问Artstation你想要下载的指定用户的主页，例如 [https://www.artstation.com/braveking](https://www.artstation.com/braveking)
 4. 启动PickTrue客户端，切换到Artstation的Tab，粘贴第三步的主页地址到地址填写处，设置好代理（没有代理似乎无法下载了）和下载文件夹，
    点击"开始下载"（注意）这时候下载进度不会更新，将不会有下载进度产生。
-5. 在浏览器页面中，右键，选择"发送相册到PickTrue并下载"，注意这一步不要重复操作，操作一次就行了。
+5. (火狐浏览器+ViolentMokney)在浏览器页面中，右键，选择"发送相册到PickTrue并下载"，注意这一步不要重复操作，操作一次就行了。
+5. (Chrome内核浏览器+ViolentMokney)在浏览器页面中，按住Crtl+鼠标右键，就会开始下载（注意这一步不要重复操作，操作一次就行了）。
 6. （可选步骤）打开浏览器控制台，观察控制台的日志。
 7. 此时，下载器的下载进度（底部状态栏）应该开始更新了，耐心等待即可：）
 
