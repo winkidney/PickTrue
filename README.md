@@ -18,6 +18,7 @@ PickTrue
 Linux请直接下载并安装Python项目即可，有打包需求再提
 
 + [适用于Artstation的油猴脚本](https://greasyfork.org/zh-CN/scripts/390597-picktruebrowser)
++ [推荐使用的油猴脚本插件](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/?src=search)
 
 # 用法
 
