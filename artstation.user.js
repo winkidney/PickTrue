@@ -25,30 +25,18 @@ let logger = {
   }
 };
 
-let Artstation = function () {
-  function _parseUserId(rawUrl) {
-    var urlArray = rawUrl.split("/");
-    var userId = urlArray[urlArray.length - 1];
-    return userId;
-  }
-
+let BrowserClient = function () {
   function fetchUrl(url, callback) {
     logger.info("Fetching url:", url);
     return $.get(url, callback);
   }
-
-  function _getUrl(userId, page) {
-    return "https://www.artstation.com/users/" + userId + "/projects.json?page=" + page;
-  }
-
   return {
-    getPage: _getUrl,
     fetchUrl: fetchUrl,
   }
 };
 
 let RequestProxy = function () {
-  let client = Artstation();
+  let client = BrowserClient();
 
   function submitTask(respData, callback) {
     logger.info("Submit response:", respData);
