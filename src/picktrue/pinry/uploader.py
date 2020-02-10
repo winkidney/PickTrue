@@ -27,6 +27,10 @@ class Uploader:
     def _get_board_id(self, board_name):
         return self.boards[board_name]
 
+    def create_boards(self, board_names: list):
+        for name in board_names:
+            self.post(self._board_add_url, json={"name": name})
+
     @property
     def boards(self):
         if self._cached_boards is not None:
