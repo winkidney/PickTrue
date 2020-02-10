@@ -177,6 +177,14 @@ class Downloader:
         for worker in self._download_workers:
             worker.join()
 
+    @property
+    def task_add_done(self):
+        return self._all_task_add
+
+    @property
+    def stopped(self):
+        return self._stop
+
     def describe(self):
         return "%s of %s downloaded" % (
             self.counter.done,

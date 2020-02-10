@@ -30,9 +30,12 @@ def art_station_run(url, path_prefix=None, proxy=None):
     return _user_home_run(site, path_prefix=path_prefix)
 
 
-def hua_ban_run(url, path_prefix=None):
+def hua_ban_run(url, path_prefix=None, return_site=False):
     site = HuaBan(url)
-    return _user_home_run(site=site, path_prefix=path_prefix)
+    if return_site:
+        return _user_home_run(site=site, path_prefix=path_prefix), site
+    else:
+        return _user_home_run(site=site, path_prefix=path_prefix)
 
 
 def hua_ban_board_run(url, path_prefix=None):

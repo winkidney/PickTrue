@@ -351,6 +351,7 @@ class HuaBan(DummySite):
     @property
     def _boards_pins(self):
         for board in self.user.boards:
+            self._boards.append(board)
             for pin in board.pins:
                 yield board, pin
 
@@ -363,7 +364,7 @@ class HuaBan(DummySite):
 
     def save_meta(self, file_name):
         meta = self.as_dict()
-        json.dump(meta, open(file_name, "wb"))
+        json.dump(meta, open(file_name, "w"))
 
 
 class HuaBanBoard(DummySite):

@@ -241,10 +241,24 @@ class HuaBan(UserHomeDownloader):
         super(HuaBan, self).__init__(*args, store_name='huaban_save_path', **kwargs)
 
     def run(self, url, path_prefix):
-        return hua_ban_run(
+        downloader, site = hua_ban_run(
             url=url,
             path_prefix=path_prefix,
+            return_site=True,
         )
+        run_as_thread(self.save_meta, downloader, site)
+        return downloader
+
+    @staticmethod
+    def save_meta(downloader, site):
+        done = False
+        while not (done or downloader.stopped):
+            time.sleep(1)
+            if downloader.task_add_done:
+                site.save_meta(
+                    os.path.join(downloader.save_dir, "meta.json")
+                )
+                done = True
 
 
 class HuaBanBoard(UserHomeDownloader):
