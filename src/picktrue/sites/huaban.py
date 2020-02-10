@@ -122,7 +122,8 @@ def get_pins(board_dict):
             "title": info['raw_text'],
             "link": info['link'],
             "source": info['source'],
-            "file_name": file_name
+            "file_name": file_name,
+            "tags": info['tags'],
         }
         pins.append(meta)
     return pins
