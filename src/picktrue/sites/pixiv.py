@@ -90,7 +90,7 @@ class Pixiv(DummySite):
         )
         self._fetcher = PixivFetcher(**proxies)
         self.api.login(username, password)
-        self._user_id = int(re.findall('id=(\d+)', url)[0])
+        self._user_id = int(url.split("/")[-1])
         self._dir_name = None
         self._total_illustrations = 0
         self._fetch_user_detail()
