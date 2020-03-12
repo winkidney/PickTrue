@@ -1,3 +1,4 @@
+import json
 from threading import Thread
 
 from flask import Flask, jsonify
@@ -67,7 +68,7 @@ def task_submit():
     """
     :return:
     """
-    resp = request.get_json(force=True)
+    resp = request.data
     server.requester.submit_response(
         resp
     )

@@ -51,6 +51,12 @@ class DummyFetcher:
         self.session.headers.update(UA)
 
     @staticmethod
+    def _safe_name(name):
+        name = name.replace("/", " ")
+        name = name.replace("\\", " ")
+        return name
+
+    @staticmethod
     def _safe_path(path):
         return Path(path).absolute()
 

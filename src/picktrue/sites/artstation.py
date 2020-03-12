@@ -1,4 +1,8 @@
+from collections import namedtuple
 import hashlib
+import json
+import os
+import re
 import time
 from urllib.parse import urljoin
 
@@ -10,8 +14,21 @@ from picktrue.sites.abstract import DummySite, DummyFetcher, get_proxy
 
 
 BASE_URL = "https://www.artstation.com/"
-PROJECT_URL_TPL = '/users/{user_id}/projects.json?page={page}'
+PROJECT_URL_TPL = '/users/{username}/projects.json?page={page}'
+ALBUMS_URL_TPL = 'https://www.artstation.com/albums.json?' \
+                 'include_total_count=true&page={page}' \
+                 '&per_page=25&user_id={user_id}'
+ALBUM_CONTENT_URL_TPL = 'https://www.artstation.com/users/{username}' \
+                        '/projects.json?album_id={album_id}&page={page}'
 DETAIL_URL_TPL = '/projects/{hash_id}.json'
+
+Album = namedtuple(
+    "Album",
+    (
+        "name",
+        "id",
+    )
+)
 
 
 def _get_file_hash(file_content):
@@ -200,9 +217,28 @@ def parse_artwork_url(item_dict):
     return url
 
 
-def get_project_page_url(user_id, page=1):
+def get_project_page_url(username, page=1):
     path = PROJECT_URL_TPL.format(
+        username=username,
+        page=page,
+    )
+    url = urljoin(BASE_URL, path)
+    return url
+
+
+def get_project_albums_page_url(user_id, page=1):
+    path = ALBUMS_URL_TPL.format(
         user_id=user_id,
+        page=page,
+    )
+    url = urljoin(BASE_URL, path)
+    return url
+
+
+def get_project_albums_details_page_url(username, album_id, page=1):
+    path = ALBUM_CONTENT_URL_TPL.format(
+        username=username,
+        album_id=album_id,
         page=page,
     )
     url = urljoin(BASE_URL, path)
@@ -220,13 +256,44 @@ class BaseMetaFetcher:
     def get_artwork_summery(self, summary_url):
         return self.request_url(summary_url)
 
-    def get_single_page(self, user_id, page):
-        initial_url = get_project_page_url(
-            user_id=user_id,
+    def get_albums_index_page(self, user_id):
+        page = 1
+        current_count = 0
+        total_count = 1
+        while current_count < total_count:
+            url = get_project_albums_page_url(
+                user_id=user_id,
+                page=page,
+            )
+            resp = self.request_url(url)
+            assert 'total_count' in resp
+            total_count = resp['total_count']
+            for album_detail in resp['data']:
+                yield Album(
+                    id=album_detail['id'],
+                    name=album_detail['title'],
+                )
+            current_count = len(resp['data'])
+            page += 1
+
+    def get_album_projects_single_page(self, username, album_id, page):
+        initial_url = get_project_albums_details_page_url(
+            username=username,
+            album_id=album_id,
             page=page,
         )
         resp = self.request_url(initial_url)
-        print(resp.keys())
+        assert 'total_count' in resp
+        total_count = resp['total_count']
+        data_count = len(resp['data'])
+        return total_count, data_count, resp['data']
+
+    def get_projects_single_page(self, username, page):
+        initial_url = get_project_page_url(
+            username=username,
+            page=page,
+        )
+        resp = self.request_url(initial_url)
         assert 'total_count' in resp
         total_count = resp['total_count']
         data_count = len(resp['data'])
@@ -249,15 +316,27 @@ class BrowserMetaFetcher(BaseMetaFetcher):
         self.server.start()
 
     def request_url(self, url):
-        return self.server.requester.send_and_wait(url)
+        text = self.server.requester.send_and_wait(url)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            return text
 
 
 class TaskMaker:
-    def __init__(self, user_id, meta_fetcher: BaseMetaFetcher):
-        self.user_id = user_id
+    def __init__(self, user_url, username, meta_fetcher: BaseMetaFetcher):
+        self.user_url = user_url
+        self.username = username
         self.meta = meta_fetcher
+        self.user_id = None
+
+    def get_user_id(self, user_url):
+        resp = self.meta.request_url(user_url)
+        user_ids = re.findall(r"user_id.*?(\d+)", resp)
+        return user_ids[0]
 
     def __call__(self, *args, **kwargs):
+        self.user_id = self.get_user_id(user_url=self.user_url)
         yield from self._gen_tasks()
 
     def _get_image_item_from_detail(self, artwork_summary):
@@ -265,29 +344,86 @@ class TaskMaker:
         resp = self.meta.get_artwork_summery(summary_url)
         return parse_single_artwork(resp)
 
-    def _yield_image_items(self, data):
+    def _yield_image_items(self, data, album_name=None):
         for summary in data:
             for image_item in self._get_image_item_from_detail(
                 summary,
             ):
+                if album_name is not None:
+                    image_item = ImageItem(
+                        url=image_item.url,
+                        name=image_item.name,
+                        meta={"album_name": album_name},
+                    )
                 yield image_item
 
-    def _gen_tasks(self):
+    def _gen_tasks_from_root(self):
         page = 1
-        total_count, current_count, data = self.meta.get_single_page(
-            self.user_id,
+        total_count, current_count, data = self.meta.get_projects_single_page(
+            self.username,
             page,
         )
         yield from self._yield_image_items(data)
         while has_next_page(current_count, total_count):
             page += 1
-            _, count_delta, data = self.meta.get_single_page(
-                self.user_id,
+            _, count_delta, data = self.meta.get_projects_single_page(
+                self.username,
                 page=page,
             )
             current_count += count_delta
             yield from self._yield_image_items(data)
             time.sleep(0.2)
+
+    def _gen_tasks_from_albums(self):
+        for index, album in enumerate(self.meta.get_albums_index_page(user_id=self.user_id)):
+            page = 1
+            current_count = 0
+            total_count = 1
+            while has_next_page(current_count, total_count):
+                total_count, count_delta, data = self.meta.get_album_projects_single_page(
+                    self.username,
+                    album.id,
+                    page,
+                )
+                current_count += count_delta
+                yield from self._yield_image_items(data, album_name=album.name)
+                time.sleep(0.2)
+                page += 1
+
+    def _gen_tasks(self):
+        yield from self._gen_tasks_from_root()
+        yield from self._gen_tasks_from_albums()
+
+
+class ArtStationFetcher(DummyFetcher):
+    """
+    New url to test album download: https://www.artstation.com/bvdhorst
+    """
+
+    def save(self, content, task_item):
+        if task_item.image.meta is None:
+            return super(ArtStationFetcher, self).save(content, task_item)
+        image = task_item.image
+        if image.meta is not None:
+            escaped_name = self._safe_name(image.meta['album_name'])
+            save_path = os.path.join(
+                task_item.base_save_path,
+                escaped_name,
+            )
+            os.makedirs(save_path, exist_ok=True)
+        else:
+            save_path = task_item.base_save_path
+        save_path = self._safe_path(save_path)
+        if callable(image.name):
+            image_name = image.name(image.url, content)
+        else:
+            image_name = image.name
+        save_path = os.path.join(
+            save_path,
+            image_name,
+        )
+        with open(save_path, "wb") as f:
+            f.write(content)
 
 
 class ArtStation(DummySite):
@@ -301,11 +437,12 @@ class ArtStation(DummySite):
         self._tasks = None
         self.url = user_url
         assert user_url.startswith(BASE_URL)
-        self.user_id = user_url.replace(BASE_URL, '')
+        self.username = user_url.replace(BASE_URL, '')
         self._proxies = get_proxy(proxy)
-        self._fetcher = DummyFetcher(**self._proxies)
+        self._fetcher = ArtStationFetcher(**self._proxies)
         self._task_maker = TaskMaker(
-            user_id=self.user_id,
+            user_url=user_url,
+            username=self.username,
             meta_fetcher=BrowserMetaFetcher(),
         )
 
@@ -315,7 +452,7 @@ class ArtStation(DummySite):
 
     @property
     def dir_name(self):
-        return self.user_id
+        return self.username
 
     @property
     def tasks(self):
