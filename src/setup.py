@@ -1,8 +1,18 @@
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, convert_path
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+
+
+def get_version():
+    ver_path = convert_path('picktrue/version.py')
+    main_ns = {}
+
+    with open(ver_path) as ver_file:
+        exec(ver_file.read(), )
+    return main_ns['__version__']
+
 
 install_requires = (
     "requests",
@@ -14,7 +24,7 @@ install_requires = (
 
 setup(
     name='picktrue',
-    version='0.4.2',
+    version=get_version(),
     packages=find_packages(HERE),
     install_requires=install_requires,
     url='https://github.com/winkidney/picktrue',

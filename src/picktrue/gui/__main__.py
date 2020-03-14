@@ -2,6 +2,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
+from picktrue import version
 from picktrue.gui.downloader import downloaders
 from picktrue.gui.toolkit import info
 
@@ -11,7 +12,7 @@ class App(tk.Tk):
     def __init__(self, *args, **kwargs):
         super(App, self).__init__(*args, **kwargs)
         self.tabs = ttk.Notebook(self)
-        self.title("PickTrue - 相册下载器")
+        self.title("PickTrue - 相册下载器 v%s" % version.__version__)
         self.build_menu()
 
         for downloader in downloaders:
