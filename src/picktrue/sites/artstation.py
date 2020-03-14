@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import namedtuple, Counter
 import hashlib
 import json
 import os
@@ -330,10 +330,16 @@ class TaskMaker:
         self.meta = meta_fetcher
         self.user_id = None
 
+    @staticmethod
+    def _get_repeated_uid(user_ids):
+        counter = Counter(user_ids)
+        top_uid = counter.most_common(1)
+        return top_uid[0][0]
+
     def get_user_id(self, user_url):
         resp = self.meta.request_url(user_url)
         user_ids = re.findall(r"user_id.*?(\d+)", resp)
-        return user_ids[0]
+        return self._get_repeated_uid(user_ids)
 
     def __call__(self, *args, **kwargs):
         self.user_id = self.get_user_id(user_url=self.user_url)
