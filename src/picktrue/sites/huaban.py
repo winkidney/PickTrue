@@ -1,5 +1,6 @@
 import json
 import re
+from json import JSONDecodeError
 from pprint import pformat
 
 import os
@@ -15,7 +16,7 @@ from picktrue.sites.abstract import DummySite, DummyFetcher
 from picktrue.utils import retry
 
 IMAGE_URL_TPL = "http://img.hb.aicdn.com/{file_key}"
-BASE_URL = "http://huabanpro.com"
+BASE_URL = "http://huaban.com"
 
 XHR_HEADERS = {
     "X-Requested-With": "XMLHttpRequest",
@@ -54,7 +55,16 @@ class HuaBanFetcher(DummyFetcher):
             kwargs.pop('timeout')
         resp = self.session.get(url, timeout=(2, 30), **kwargs)
         if require_json:
-            resp.json()
+            try:
+                resp.json()
+            except JSONDecodeError:
+                download_logger.error(
+                    "Failed to convert resp to json for url {}: {}".format(
+                        url,
+                        resp.text,
+                    )
+                )
+                raise
         return resp
 
     @staticmethod
