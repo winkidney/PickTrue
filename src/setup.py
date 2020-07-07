@@ -20,6 +20,7 @@ install_requires = (
     'pixivpy',
     'PySocks',
     'flask',
+    'pyquery',
 )
 
 setup(
