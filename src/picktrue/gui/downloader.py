@@ -3,7 +3,8 @@ import os
 import time
 import tkinter as tk
 
-from picktrue.gui.entry import art_station_run, hua_ban_run, pixiv_run, hua_ban_board_run
+from picktrue.gui.entry import art_station_run, hua_ban_run, pixiv_run, hua_ban_board_run, \
+    douban_personal_album_board_run
 from picktrue.gui.toolkit import (
     NamedInput, FileBrowse, StatusBar, info, ProgressBar, open_sys_explorer, PasswordInput,
     ProxyInput
@@ -265,6 +266,25 @@ class HuaBanBoard(UserHomeDownloader):
         )
 
 
+class DoubanPsersonalAlbum(UserHomeDownloader):
+
+    title = "豆瓣(按相册)"
+
+    def __init__(self, *args, **kwargs):
+        super(DoubanPsersonalAlbum, self).__init__(
+            *args,
+            store_name='douban_personal_album_save_path',
+            user_home_name="相册地址",
+            **kwargs
+        )
+
+    def run(self, url, path_prefix):
+        return douban_personal_album_board_run(
+            url=url,
+            path_prefix=path_prefix,
+        )
+
+
 class ArtStation(UserHomeDownloader):
 
     title = "ArtStation(按作者)"
@@ -307,6 +327,7 @@ downloaders = [
     HuaBan,
     HuaBanBoard,
     Pixiv,
+    DoubanPsersonalAlbum,
 ]
 
 

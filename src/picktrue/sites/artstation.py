@@ -11,7 +11,7 @@ import requests
 from picktrue.meta import ImageItem, UA
 from picktrue.rpc.taskserver import server
 from picktrue.sites.abstract import DummySite, DummyFetcher, get_proxy
-
+from picktrue.sites.utils import get_name_with_hash_from_url
 
 BASE_URL = "https://www.artstation.com/"
 PROJECT_URL_TPL = '/users/{username}/projects.json?page={page}'
@@ -29,27 +29,6 @@ Album = namedtuple(
         "id",
     )
 )
-
-
-def _get_file_hash(file_content):
-    m = hashlib.md5()
-    m.update(file_content)
-    return m.digest().hex()
-
-
-def get_name_from_url(img_url: str, file_content):
-    file_name = img_url.split(
-        '/'
-    )[-1]
-    file_name = file_name.split('?')[:-1]
-    file_name = '?'.join(file_name)
-    name_postfix = _get_file_hash(file_content)
-    name = file_name.split('.')[:-1]
-    name = ".".join(name)
-    ext = file_name.split('.')[-1]
-    file_name = "-".join([name, name_postfix])
-    file_name = ".".join([file_name, ext])
-    return file_name
 
 
 def parse_single_artwork(artwork_dict: dict):
@@ -158,7 +137,7 @@ def parse_single_artwork(artwork_dict: dict):
     images = (
         ImageItem(
             url=asset['image_url'],
-            name=get_name_from_url,
+            name=get_name_with_hash_from_url,
         )
         for asset in assets
     )
