@@ -8,9 +8,9 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 def get_version():
     ver_path = convert_path('picktrue/version.py')
     main_ns = {}
-
     with open(ver_path) as ver_file:
-        exec(ver_file.read(), )
+        content = ver_file.read()
+        exec(content, main_ns)
     return main_ns['__version__']
 
 
