@@ -33,6 +33,8 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
   + 按画板 ：http://huaban.com/boards/18720569/ 
 + Pixiv
   + 个人页（按作者，如果是漫画则会自动建立子文件夹）： https://www.pixiv.net/en/users/212801
++ 豆瓣
+  + 相册：https://www.douban.com/photos/album/145972492/
 
 ## 通用
 
