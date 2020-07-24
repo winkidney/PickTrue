@@ -1,3 +1,6 @@
+# log file
+*.log
+
 # fucking MacOS
 .DS_Store
 

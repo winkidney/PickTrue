@@ -5,6 +5,7 @@ import tkinter as tk
 
 from picktrue.gui.entry import art_station_run, hua_ban_run, pixiv_run, hua_ban_board_run, \
     douban_personal_album_board_run
+from picktrue.gui.pinry_importer import PinryImporterGUI
 from picktrue.gui.toolkit import (
     NamedInput, FileBrowse, StatusBar, info, ProgressBar, open_sys_explorer, PasswordInput,
     ProxyInput
@@ -241,10 +242,12 @@ class HuaBan(UserHomeDownloader):
         super(HuaBan, self).__init__(*args, store_name='huaban_save_path', **kwargs)
 
     def run(self, url, path_prefix):
-        return hua_ban_run(
+        downloader, site = hua_ban_run(
             url=url,
             path_prefix=path_prefix,
+            return_site=True,
         )
+        return downloader
 
 
 class HuaBanBoard(UserHomeDownloader):
@@ -328,9 +331,11 @@ downloaders = [
     HuaBanBoard,
     Pixiv,
     DoubanPsersonalAlbum,
+    PinryImporterGUI,
 ]
 
 
 __all__ = (
     "downloaders",
+    "mk_normal_inputs",
 )

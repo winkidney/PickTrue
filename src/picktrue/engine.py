@@ -6,7 +6,7 @@ from threading import Thread
 import time
 from functools import wraps
 
-from picktrue.logger import download_logger
+from picktrue.logger import pk_logger
 from picktrue.meta import DownloadTaskItem
 from picktrue.utils import run_as_thread
 
@@ -58,7 +58,7 @@ def mk_download_save_function(fetcher):
         """
         response = fetcher.get(task_item.image.url)
         if response is None:
-            download_logger.error("Failed to download image: %s" % task_item.image.url)
+            pk_logger.error("Failed to download image: %s" % task_item.image.url)
             return
         fetcher.save(response.content, task_item)
         return True
@@ -176,6 +176,14 @@ class Downloader:
 
         for worker in self._download_workers:
             worker.join()
+
+    @property
+    def task_add_done(self):
+        return self._all_task_add
+
+    @property
+    def stopped(self):
+        return self._stop
 
     def describe(self):
         return "%s of %s downloaded" % (
