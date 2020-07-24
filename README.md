@@ -9,6 +9,7 @@ PickTrue
 
 画师/设计师们也可以用来构建自己的Visual Library
 
+**划重点**：现在支持导出画板的画板和Tag信息，并且导入另一个个人画板项目[Pinry](https://github.com/pinry/pinry)啦！
 
 # 下载
 
