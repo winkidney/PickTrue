@@ -5,10 +5,11 @@ from urllib.parse import urljoin
 import requests
 
 from picktrue.logger import pk_logger
+from picktrue.utils import get_file_size_kb
 
 
 class Uploader:
-    def __init__(self, pinry_url, username, password, login=False):
+    def __init__(self, pinry_url, username, password, login=False, min_upload_size_kb=None):
         """
         @:param: pinry_url, like https://pin.xxx.com/
         """
@@ -19,7 +20,9 @@ class Uploader:
         self._image_creation_url = urljoin(self._api_prefix, 'images/')
         self._board_add_url = urljoin(self._api_prefix, 'boards/')
         self._board_list_url = urljoin(self._api_prefix, 'boards-auto-complete/')
+        self._min_upload_size_kb = min_upload_size_kb
         self._cached_boards = None
+
         self.session = requests.session()
         self._username = username
         self._password = password
@@ -93,6 +96,11 @@ class Uploader:
             raise ValueError(
                 "Failed to upload image [%s]: not found" % file_path
             )
+        if self._min_upload_size_kb is not None:
+            if get_file_size_kb(file_path) < self._min_upload_size_kb:
+                raise ValueError(
+                    "Failed to upload image[%s]: size too small" % file_path
+                )
         resp = self.post(
             self._image_creation_url,
             files={"image": open(file_path, "rb")},

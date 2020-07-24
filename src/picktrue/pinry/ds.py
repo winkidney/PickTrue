@@ -38,11 +38,14 @@ def from_csv(path='pins2import.csv') -> List[Pin2Import]:
         reader = csv.DictReader(csv_file, delimiter="|")
         rows = list(reader)
         for row in rows:
-            tags = row['tags'].strip()
+            tags = row['tags'].strip() if row['tags'] else row['tags']
             if not tags:
                 row['tags'] = []
             else:
-                row['tags'] = eval(tags)
+                if "[" in tags:
+                    row['tags'] = eval(tags)
+                else:
+                    row['tags'] = [tags, ]
             row['file_abs_path'] = row['file_abs_path'] or None
             row['image_url2download'] = row['image_url2download'] or None
         return [Pin2Import(**row) for row in rows]

@@ -14,6 +14,7 @@ class PinryImporterGUI(tk.Frame):
         super(PinryImporterGUI, self).__init__(*args, **kwargs)
 
         self._url = NamedInput(self, name="Pinry部署地址")
+        self._min_size = NamedInput(self, name="最小上传大小(KB)（低于此值的文件不上传，不限制请留空）")
         self._username = NamedInput(self, name="用户名")
         self._password = PasswordInput(self, name="密码")
         self._csv_file = FilePathBrowse(self, store_name="import_csv", text_label="CSV文件文件路径")
@@ -24,10 +25,19 @@ class PinryImporterGUI(tk.Frame):
         self.start_update()
 
     def _get_importer(self):
+        min_size = self._min_size.get_input()
+        if min_size:
+            try:
+                min_size = int(min_size)
+            except Exception:
+                info("最小文件上传大小应该是整数")
+        else:
+            min_size = None
         return PinryImporter(
             base_url=self._url.get_input(),
             username=self._username.get_input(),
             password=self._password.get_input(),
+            min_upload_size_kb=min_size,
         )
 
     def build_buttons(self):

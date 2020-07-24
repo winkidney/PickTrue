@@ -1,3 +1,4 @@
+import os
 import time
 
 from functools import wraps
@@ -34,3 +35,14 @@ def retry(max_retries=3):
         return wrapped
 
     return wrapper
+
+
+def convert2kb(size_in_bytes):
+    """ Convert the size from bytes to other units like KB, MB or GB"""
+    return size_in_bytes / 1024
+
+
+def get_file_size_kb(file_name):
+    """ Get file in size in given unit like KB, MB or GB"""
+    size = os.path.getsize(file_name)
+    return convert2kb(size)

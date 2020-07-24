@@ -9,7 +9,7 @@ from picktrue.pinry.uploader import Uploader
 class PinryImporter:
     _counter_lock = Lock()
 
-    def __init__(self, base_url, username, password):
+    def __init__(self, base_url, username, password, min_upload_size_kb=None):
         self._base_url = base_url
         self._username = username
         self._password = password
@@ -18,6 +18,11 @@ class PinryImporter:
         self.error_pins = 0
         self._started = False
         self._creating_boards = False
+        self._min_upload_size_kb = None
+        if min_upload_size_kb is not None:
+            if int(min_upload_size_kb) != 0:
+                self._min_upload_size_kb = min_upload_size_kb
+
         self._executor = ThreadPoolExecutor(
             max_workers=1,
         )
@@ -82,6 +87,7 @@ class PinryImporter:
             self._username,
             self._password,
             login=True,
+            min_upload_size_kb=self._min_upload_size_kb,
         )
         pins = from_csv(file_path)
         self._started = True
