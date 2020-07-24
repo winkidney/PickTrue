@@ -11,7 +11,8 @@ from collections import namedtuple
 from urllib.parse import urljoin
 
 from picktrue.logger import download_logger
-from picktrue.meta import ImageItem
+from picktrue.meta import ImageItem, DownloadTaskItem
+from picktrue.pinry.ds import Pin2Import, write_to_csv
 from picktrue.sites.abstract import DummySite, DummyFetcher
 from picktrue.utils import retry
 
@@ -37,11 +38,26 @@ Pin = namedtuple(
 
 
 class HuaBanFetcher(DummyFetcher):
+
     def __init__(self):
         super(HuaBanFetcher, self).__init__()
         self.session.headers.update(
             XHR_HEADERS,
         )
+
+    @classmethod
+    def get_save_path(cls, task_item):
+        save_path = os.path.join(
+            task_item.base_save_path,
+            task_item.image.meta['board_name'],
+        )
+        cls.ensure_dir(dir_path=save_path)
+        save_path = os.path.join(
+            save_path,
+            task_item.image.name,
+        )
+        save_path = cls._safe_path(save_path)
+        return save_path
 
     @retry()
     def get(self, url, require_json=False, **kwargs):
@@ -71,26 +87,19 @@ class HuaBanFetcher(DummyFetcher):
     def ensure_dir(dir_path):
         return os.makedirs(dir_path, exist_ok=True)
 
-    def save(self, content, task_item):
+    def save(self, content, task_item: DownloadTaskItem):
         """
         :type content: bytearray
         :type task_item: picktrue.meta.TaskItem
         """
         if task_item.image.meta is None:
             return super(HuaBanFetcher, self).save(content, task_item)
-        image = task_item.image
-        save_path = os.path.join(
-            task_item.base_save_path,
-            image.meta['board_name'],
-        )
-        self.ensure_dir(dir_path=save_path)
-        save_path = os.path.join(
-            save_path,
-            image.name,
-        )
-        save_path = self._safe_path(save_path)
+        save_path = self.get_save_path(task_item)
         with open(save_path, "wb") as f:
             f.write(content)
+        pin2import = mk_pin2import(task_item)
+        if pin2import:
+            write_to_csv(pin2import, base_path=task_item.base_save_path)
 
 
 def _random_string(length):
@@ -141,6 +150,20 @@ def get_boards(user_meta):
         }
         boards.append(meta)
     return boards
+
+
+def mk_pin2import(task_item: DownloadTaskItem) -> Pin2Import or None:
+    if task_item.image.meta is None:
+        return None
+    meta = task_item.image.pin_meta
+    return Pin2Import(
+        referer=meta['link'],
+        tags=meta['tags'],
+        description=meta['title'],
+        board=task_item.image.meta['board_name'],
+        file_abs_path=HuaBanFetcher.get_save_path(task_item),
+        image_url2download="",
+    )
 
 
 class Board(object):
@@ -346,7 +369,8 @@ class HuaBan(DummySite):
                 name=pin_item.filename,
                 meta={
                     'board_name': board.title,
-                }
+                },
+                pin_meta=pin_meta,
             )
 
     @property
@@ -362,10 +386,6 @@ class HuaBan(DummySite):
             board.as_dict() for board in self._boards
         ]
         return meta
-
-    def save_meta(self, file_name):
-        meta = self.as_dict()
-        json.dump(meta, open(file_name, "w"))
 
 
 class HuaBanBoard(DummySite):
@@ -391,4 +411,5 @@ class HuaBanBoard(DummySite):
             yield ImageItem(
                 url=pin_item.url,
                 name=pin_item.filename,
+                pin_meta=pin_meta,
             )

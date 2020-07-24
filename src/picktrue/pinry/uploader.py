@@ -14,6 +14,7 @@ class Uploader:
         self._api_prefix = urljoin(pinry_url, '/api/v2/')
         self._login_url = urljoin(self._api_prefix, 'profile/login/')
         self._pin_creation_url = urljoin(self._api_prefix, 'pins/')
+        self._image_creation_url = urljoin(self._api_prefix, 'images/')
         self._board_add_url = urljoin(self._api_prefix, 'boards/')
         self._board_list_url = urljoin(self._api_prefix, 'boards-auto-complete/')
         self._cached_boards = None
@@ -59,13 +60,20 @@ class Uploader:
             headers=headers,
         )
 
-    def post(self, url, json=None):
+    def post(self, url, json=None, files=None):
         headers = self._get_csrf_token()
-        return self.session.post(
-            url=url,
-            json=json,
-            headers=headers,
-        )
+        if files is None:
+            return self.session.post(
+                url=url,
+                json=json,
+                headers=headers,
+            )
+        else:
+            return self.session.post(
+                url=url,
+                headers=headers,
+                files=files,
+            )
 
     def login(self, username, password):
         data = {
@@ -73,16 +81,18 @@ class Uploader:
             'password': password,
         }
         resp = self.post(url=self._login_url, json=data)
-        assert resp.status_code == 200
+        return resp.status_code == 200
 
-    def create(self, description, referer, url, board_name, tags):
-        board_url = self._get_board_url(board_name)
-        data = dict(
-            description=description,
-            referer=referer,
-            url=url,
-            tags=tags,
+    def _upload_image(self, file_path):
+        resp = self.post(
+            self._image_creation_url,
+            files={"image": open(file_path, "rb")},
         )
+        assert resp.status_code == 201
+        return resp.json()['id']
+
+    def _create_pin(self, data, board_name):
+        board_url = self._get_board_url(board_name)
         resp = self.post(
             url=self._pin_creation_url,
             json=data,
@@ -97,24 +107,27 @@ class Uploader:
         )
         assert resp.status_code == 200
 
+    def create_with_file_upload(self, description, referer, file_path, board_name, tags):
+        image_id = self._upload_image(file_path)
+        data = dict(
+            description=description,
+            referer=referer,
+            tags=tags,
+            image_by_id=image_id,
+        )
+        return self._create_pin(
+            data,
+            board_name,
+        )
 
-def from_csv(path='hi.csv'):
-    import csv
-    with open(path, 'r') as csv_file:
-        reader = csv.DictReader(csv_file, delimiter="|")
-        rows = list(reader)
-        for row in rows:
-            row['tags'] = eval(row['tags'])
-        return rows
-
-
-def to_csv(row_dicts, path='hello.csv'):
-    import csv
-    fields_names = ['description', 'referer', 'url', 'board_name', 'tags']
-    with open(path, 'w') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fields_names, delimiter="|")
-        writer.writeheader()
-        for row in row_dicts:
-            writer.writerow(
-                row,
-            )
+    def create(self, description, referer, url, board_name, tags):
+        data = dict(
+            description=description,
+            referer=referer,
+            url=url,
+            tags=tags,
+        )
+        return self._create_pin(
+            data,
+            board_name,
+        )

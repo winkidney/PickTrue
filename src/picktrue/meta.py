@@ -5,8 +5,9 @@ from typing import NamedTuple
 # requires python >= 3.6.1
 class ImageItem(NamedTuple):
     url: str
-    name: str or function
+    name: str or callable
     meta: dict = None
+    pin_meta: dict = None
 
 
 DownloadTaskItem = namedtuple(
