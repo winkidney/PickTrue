@@ -4,9 +4,11 @@ from urllib.parse import urljoin
 
 import requests
 
+from picktrue.logger import pk_logger
+
 
 class Uploader:
-    def __init__(self, pinry_url, username, password):
+    def __init__(self, pinry_url, username, password, login=False):
         """
         @:param: pinry_url, like https://pin.xxx.com/
         """
@@ -19,7 +21,10 @@ class Uploader:
         self._board_list_url = urljoin(self._api_prefix, 'boards-auto-complete/')
         self._cached_boards = None
         self.session = requests.session()
-        self.login(username, password)
+        self._username = username
+        self._password = password
+        if login:
+            self.login()
 
     def _get_board_url(self, board_name):
         board_id = self._get_board_id(board_name)
@@ -28,7 +33,7 @@ class Uploader:
     def _get_board_id(self, board_name):
         return self.boards[board_name]
 
-    def create_boards(self, board_names: list):
+    def create_boards(self, board_names: set):
         for name in board_names:
             self.post(self._board_add_url, json={"name": name})
 
@@ -75,10 +80,10 @@ class Uploader:
                 files=files,
             )
 
-    def login(self, username, password):
+    def login(self):
         data = {
-            'username': username,
-            'password': password,
+            'username': self._username,
+            'password': self._password,
         }
         resp = self.post(url=self._login_url, json=data)
         return resp.status_code == 200
@@ -88,7 +93,13 @@ class Uploader:
             self._image_creation_url,
             files={"image": open(file_path, "rb")},
         )
-        assert resp.status_code == 201
+        if resp.status_code != 201:
+            raise ValueError(
+                "Failed to upload image [%s]: %s" % (
+                    file_path,
+                    resp.json(),
+                )
+            )
         return resp.json()['id']
 
     def _create_pin(self, data, board_name):
@@ -98,14 +109,17 @@ class Uploader:
             json=data,
         )
         if resp.status_code != 201:
-            raise ValueError("Failed to create pin %s" % resp.content)
+            raise ValueError("Failed to create pin %s, %s" % (data, resp.content))
         pin = resp.json()
         pin_id = pin['id']
         resp = self.patch(
             url=board_url,
             json={'pins_to_add': [pin_id, ]}
         )
-        assert resp.status_code == 200
+        if resp.status_code != 200:
+            pk_logger.error(
+                "Failed to add pin to board: %s, %s" % (board_name, pin)
+            )
 
     def create_with_file_upload(self, description, referer, file_path, board_name, tags):
         image_id = self._upload_image(file_path)

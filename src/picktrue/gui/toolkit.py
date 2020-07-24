@@ -29,7 +29,6 @@ def get_working_dir():
     return os.getcwd()
 
 
-
 class StatusBar(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -108,10 +107,10 @@ class ProxyInput(NamedInput):
 
 class FileBrowse(tk.Frame):
 
-    def __init__(self, master=None, store_name=None, **kwargs):
+    def __init__(self, master=None, store_name=None, text_label=None, **kwargs):
         super(FileBrowse, self).__init__(master=master, **kwargs)
         self.label_text = tk.StringVar()
-        btn = tk.Button(self, text="下载到", command=self.choose_file)
+        btn = tk.Button(self, text=text_label or "下载到", command=self.choose_file)
         btn.pack(
             side=tk.LEFT,
         )
@@ -134,10 +133,13 @@ class FileBrowse(tk.Frame):
             save_path
         )
 
-    def choose_file(self):
-        path = filedialog.askdirectory(
+    def ask_path(self):
+        return filedialog.askdirectory(
             title="选择下载文件夹",
         )
+
+    def choose_file(self):
+        path = self.ask_path()
         if not path:
             return
         path = Path(path)
@@ -155,6 +157,13 @@ class FileBrowse(tk.Frame):
                 "%s 不能为空"
             )
             raise ValueError("Value should not be null")
+
+
+class FilePathBrowse(FileBrowse):
+    def ask_path(self):
+        return filedialog.askopenfilename(
+            title="选择csv文件",
+        )
 
 
 class ProgressBar(ttk.Progressbar):

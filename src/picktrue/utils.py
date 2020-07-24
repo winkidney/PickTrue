@@ -1,7 +1,7 @@
 import time
 
 from functools import wraps
-from picktrue.logger import download_logger
+from picktrue.logger import pk_logger
 
 from threading import Thread
 
@@ -27,7 +27,7 @@ def retry(max_retries=3):
                     return func(*args, **kwargs)
                 except Exception:
                     if retries > max_retries:
-                        download_logger.exception("Error occurs while execute function\n")
+                        pk_logger.exception("Error occurs while execute function\n")
                         break
                     time.sleep(1)
             return None

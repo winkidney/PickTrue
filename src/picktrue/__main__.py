@@ -3,7 +3,7 @@ import click
 from picktrue.sites.douban import DoubanPersonalAlbum
 from picktrue.sites.pixiv import Pixiv
 
-from picktrue.logger import download_logger
+from picktrue.logger import pk_logger
 from picktrue.sites.artstation import ArtStation
 from picktrue.sites.huaban import HuaBan, HuaBanBoard
 from picktrue.engine import Downloader
@@ -26,15 +26,15 @@ def artstation_user(url, proxy):
     downloader.add_task(
         site.tasks
     )
-    download_logger.info("All task add...waiting for execution...")
+    pk_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        download_logger.warn("Exiting...Press crtl+c again to force quit")
+        pk_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        download_logger.info("All task done...Enjoy!")
+        pk_logger.info("All task done...Enjoy!")
 
 
 @click.argument("url")
@@ -48,15 +48,15 @@ def huban_user(url):
     downloader.add_task(
         site.tasks
     )
-    download_logger.info("All task add...waiting for execution...")
+    pk_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        download_logger.warn("Exiting...Press crtl+c again to force quit")
+        pk_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        download_logger.info("All task done...Enjoy!")
+        pk_logger.info("All task done...Enjoy!")
 
 
 @click.argument("url")
@@ -70,15 +70,15 @@ def huban_board(url):
     downloader.add_task(
         site.tasks
     )
-    download_logger.info("All task add...waiting for execution...")
+    pk_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        download_logger.warn("Exiting...Press crtl+c again to force quit")
+        pk_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        download_logger.info("All task done...Enjoy!")
+        pk_logger.info("All task done...Enjoy!")
 
 
 @click.option(
@@ -99,15 +99,15 @@ def huban_user(member_id, username, password, proxy):
     downloader.add_task(
         site.tasks
     )
-    download_logger.info("All task add...waiting for execution...")
+    pk_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        download_logger.warn("Exiting...Press crtl+c again to force quit")
+        pk_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        download_logger.info("All task done...Enjoy!")
+        pk_logger.info("All task done...Enjoy!")
 
 
 @click.argument("album-url")
@@ -121,15 +121,15 @@ def douban_personal_album(album_url):
     downloader.add_task(
         site.tasks
     )
-    download_logger.info("All task add...waiting for execution...")
+    pk_logger.info("All task add...waiting for execution...")
     try:
         downloader.join()
     except KeyboardInterrupt:
-        download_logger.warn("Exiting...Press crtl+c again to force quit")
+        pk_logger.warn("Exiting...Press crtl+c again to force quit")
         downloader.stop()
         exit(0)
     else:
-        download_logger.info("All task done...Enjoy!")
+        pk_logger.info("All task done...Enjoy!")
 
 
 def main():

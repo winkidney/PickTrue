@@ -10,7 +10,7 @@ import string
 from collections import namedtuple
 from urllib.parse import urljoin
 
-from picktrue.logger import download_logger
+from picktrue.logger import pk_logger
 from picktrue.meta import ImageItem, DownloadTaskItem
 from picktrue.pinry.ds import Pin2Import, write_to_csv
 from picktrue.sites.abstract import DummySite, DummyFetcher
@@ -74,7 +74,7 @@ class HuaBanFetcher(DummyFetcher):
             try:
                 resp.json()
             except JSONDecodeError:
-                download_logger.error(
+                pk_logger.error(
                     "Failed to convert resp to json for url {}: {}".format(
                         url,
                         resp.text,
@@ -215,7 +215,7 @@ class Board(object):
                 "pin_count: %s, "
                 "current_pins: %s, "
             )
-            download_logger.error(
+            pk_logger.error(
                 info% (
                     self.title,
                     self.base_url,

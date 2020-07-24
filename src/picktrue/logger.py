@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 def __get_logger(name):
     __log_level = logging.INFO
 
@@ -12,19 +13,25 @@ def __get_logger(name):
     formatter = logging.Formatter(fmt, date_fmt)
 
     handler = logging.StreamHandler()
+    file_handler = logging.FileHandler(
+        "./picktrue.all.log",
+    )
     handler.setFormatter(formatter)
 
     logger = logging.getLogger(name)
     logger.addHandler(
         handler
     )
+    logger.addHandler(
+        file_handler
+    )
     logger.setLevel(level=__log_level)
     return logger
 
 
-download_logger = __get_logger('download')
+pk_logger = __get_logger('picktrue')
 
 
 __all__ = (
-    'download_logger',
+    'pk_logger',
 )
