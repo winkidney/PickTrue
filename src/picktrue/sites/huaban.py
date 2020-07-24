@@ -295,11 +295,15 @@ class User(object):
     def _fetch_boards(self):
         assert len(self._boards_metas) == 0
         self._boards_metas.extend(self._fetch_home())
-        while self.board_count > len(self._boards_metas):
-            further_boards = self._fetch_further(self._boards_metas)
-            self._boards_metas.extend(further_boards)
+        further_boards = self._boards_metas
+        while True:
             for meta in further_boards:
                 yield Board(meta['board_id'])
+            if self.board_count > len(self._boards_metas):
+                further_boards = self._fetch_further(self._boards_metas)
+                self._boards_metas.extend(further_boards)
+            else:
+                break
 
     @property
     def boards(self):
