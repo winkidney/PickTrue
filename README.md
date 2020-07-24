@@ -25,6 +25,9 @@ Linux请直接下载并安装Python项目即可，有打包需求再提
 
 # 用法
 
+## 从花瓣迁移到Pinry
+参见：[导入到Pinry](./doc/import-to-pinry.md)
+
 ## 支持列表和网址范例
 
 + ArtStation
