@@ -1,5 +1,5 @@
 # coding: utf-8
-
+import os
 from urllib.parse import urljoin
 
 import requests
@@ -89,6 +89,10 @@ class Uploader:
         return resp.status_code == 200
 
     def _upload_image(self, file_path):
+        if not os.path.exists(file_path):
+            raise ValueError(
+                "Failed to upload image [%s]: not found" % file_path
+            )
         resp = self.post(
             self._image_creation_url,
             files={"image": open(file_path, "rb")},
