@@ -54,6 +54,8 @@ class DummyFetcher:
     def _safe_name(name):
         name = name.replace("/", " ")
         name = name.replace("\\", " ")
+        name = name.strip()
+        name = name.replace(" ", '-')
         return name
 
     @staticmethod

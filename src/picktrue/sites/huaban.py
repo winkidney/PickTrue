@@ -47,9 +47,10 @@ class HuaBanFetcher(DummyFetcher):
 
     @classmethod
     def get_save_path(cls, task_item):
+        board_name = cls._safe_name(task_item.image.meta['board_name'])
         save_path = os.path.join(
             task_item.base_save_path,
-            task_item.image.meta['board_name'],
+            board_name,
         )
         cls.ensure_dir(dir_path=save_path)
         save_path = os.path.join(
