@@ -189,6 +189,9 @@ class Fetcher(DummyFetcher):
                 project_dir,
                 image.meta['title'],
             )
+        else:
+            if not image.meta['search_keyword']:
+                image_name = safe_file_name(image.meta['title'] + "." + image_name.split(".")[-1])
         if not os.path.exists(project_dir):
             os.makedirs(project_dir, exist_ok=True)
         return os.path.join(project_dir, image_name)
