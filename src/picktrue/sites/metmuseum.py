@@ -190,8 +190,9 @@ class Fetcher(DummyFetcher):
                 image.meta['title'],
             )
         else:
-            if not image.meta['search_keyword']:
-                image_name = safe_file_name(image.meta['title'] + "." + image_name.split(".")[-1])
+            splited = image_name.split(".")
+            name, ext = ".".join(splited[:-1]), splited[-1]
+            image_name = safe_file_name(image.meta['title'] + name + "." + ext)
         if not os.path.exists(project_dir):
             os.makedirs(project_dir, exist_ok=True)
         return os.path.join(project_dir, image_name)
@@ -228,8 +229,8 @@ class MetMuseum(DummySite):
 def main():
     import sys
     site = MetMuseum(
-        sys.argv[1],
-        # "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
+        # sys.argv[1],
+        "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
         # "https://www.metmuseum.org/art/collection/search/35684?searchField=All&sortBy=Relevance&what=Archery&ft=*&offset=0&rpp=20&pos=13"
     )
     downloader = Downloader(save_dir=".", fetcher=site.fetcher)
@@ -238,7 +239,6 @@ def main():
         background=True,
     )
     downloader.join(background=False)
-    return downloader
 
 
 if __name__ == '__main__':

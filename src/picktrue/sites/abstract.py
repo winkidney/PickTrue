@@ -97,3 +97,4 @@ class DummyFetcher:
             return
         with open(save_path, "wb") as f:
             f.write(content)
+            f.flush()
