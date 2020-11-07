@@ -223,8 +223,10 @@ class MetMuseum(DummySite):
 
 
 def main():
+    import sys
     site = MetMuseum(
-        "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
+        sys.argv[1],
+        # "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
         # "https://www.metmuseum.org/art/collection/search/35684?searchField=All&sortBy=Relevance&what=Archery&ft=*&offset=0&rpp=20&pos=13"
     )
     downloader = Downloader(save_dir=".", fetcher=site.fetcher)
