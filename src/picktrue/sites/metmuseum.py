@@ -232,7 +232,7 @@ def main():
     downloader = Downloader(save_dir=".", fetcher=site.fetcher)
     downloader.add_task(
         site.tasks,
-        background=False,
+        background=True,
     )
     downloader.join(background=False)
     return downloader
