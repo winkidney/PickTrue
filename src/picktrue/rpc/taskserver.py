@@ -75,6 +75,20 @@ def task_submit():
     return jsonify({})
 
 
+class BrowserMetaFetcher:
+    server = server
+
+    def __init__(self):
+        self.server.start()
+
+    def request_url(self, url):
+        text = self.server.requester.send_and_wait(url)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            return text
+
+
 if __name__ == '__main__':
     server.start()
     # server.start_debug_task()

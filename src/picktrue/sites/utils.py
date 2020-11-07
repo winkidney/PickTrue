@@ -31,3 +31,7 @@ def get_name_with_hash_from_url(img_url: str, file_content):
     file_name = "-".join([name, name_postfix])
     file_name = ".".join([file_name, ext])
     return file_name
+
+
+def safe_file_name(file_name):
+    return file_name.replace("/", "_")

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import requests
 
-from picktrue.meta import UA
+from picktrue.meta import UA, ImageItem
 from picktrue.utils import retry
 
 
@@ -71,6 +71,13 @@ class DummyFetcher:
             kwargs.pop('timeout')
         return self.session.get(url, timeout=(2, 30), **kwargs)
 
+    def get_save_path(self, base_path, image_name, image: ImageItem):
+        save_path = os.path.join(
+            base_path,
+            image_name,
+        )
+        return save_path
+
     def save(self, content, task_item):
         """
         :type content: bytearray
@@ -80,9 +87,10 @@ class DummyFetcher:
         image_name = image.name
         if callable(image.name):
             image_name = image.name(image.url, content)
-        save_path = os.path.join(
-            task_item.base_save_path,
-            image_name,
+        save_path = self.get_save_path(
+            base_path=task_item.base_save_path,
+            image_name=image_name,
+            image=image,
         )
         save_path = self._safe_path(save_path)
         if os.path.exists(save_path):

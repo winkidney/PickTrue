@@ -51,10 +51,10 @@ def mk_download_save_function(fetcher):
     :type fetcher: picktrue.sites.abstract.DummyFetcher
     """
 
-    def download_then_save(task_item):
+    def download_then_save(task_item: DownloadTaskItem):
         """
         :return True if download ok
-        :type task_item: picktrue.meta.TaskItem
+        :type task_item: picktrue.meta.DownloadTaskItem
         """
         response = fetcher.get(task_item.image.url)
         if response is None:

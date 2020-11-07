@@ -1,4 +1,3 @@
-import json
 import re
 from json import JSONDecodeError
 from pprint import pformat
@@ -14,6 +13,7 @@ from picktrue.logger import pk_logger
 from picktrue.meta import ImageItem, DownloadTaskItem
 from picktrue.pinry.ds import Pin2Import, write_to_csv
 from picktrue.sites.abstract import DummySite, DummyFetcher
+from picktrue.sites.utils import safe_file_name
 from picktrue.utils import retry
 
 IMAGE_URL_TPL = "http://img.hb.aicdn.com/{file_key}"
@@ -110,10 +110,6 @@ def _random_string(length):
     )
 
 
-def _safe_file_name(file_name):
-    return file_name.replace("/", "_")
-
-
 def _get_file_ext(mime_type):
     return mime_type.split("/")[-1]
 
@@ -147,7 +143,7 @@ def get_boards(user_meta):
             "title": board['title'],
             "pins": None,
             "pin_count": board['pin_count'],
-            "dir_name": _safe_file_name(board['title']),
+            "dir_name": safe_file_name(board['title']),
         }
         boards.append(meta)
     return boards
@@ -399,7 +395,7 @@ class HuaBanBoard(DummySite):
 
     @property
     def dir_name(self):
-        return _safe_file_name(
+        return safe_file_name(
             "%s-%s" % (self._board.title, self._board.id)
         )
 
