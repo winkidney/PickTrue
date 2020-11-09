@@ -56,8 +56,7 @@ class SearchPage:
     def safe_search_keyword(self):
         return safe_file_name(self._params["material"][0])
 
-    @property
-    def search_request(self):
+    def get_search_request(self, offset, page_size, per_page):
         tpl = (
             "https://www.metmuseum.org/mothra/collectionlisting/search"
             "?material={keyword}"
@@ -70,9 +69,9 @@ class SearchPage:
         )
         return tpl.format(
             keyword=self.safe_search_keyword,
-            offset=self._params.get('offset', [0])[0],
-            page_size=self._params.get('pageSize', [0])[0],
-            per_page=self._params.get('perPage', [20])[0],
+            offset=offset,
+            page_size=page_size,
+            per_page=per_page,
         )
 
     def get_image_items(self, ):
@@ -96,19 +95,32 @@ class SearchPage:
             },
         }
         """
-        r = self._fetcher.request_url(
-            url=self.search_request,
-        )
-        for image_meta in r['results']:
-            page_url = image_meta['url']
-            items = ItemPage(
-                page_url=page_url,
-                meta_fetcher=self._fetcher,
-                search_keyword=self.safe_search_keyword,
-            ).get_image_items()
-            if items:
-                for item in items:
-                    yield item
+        offset = int(self._params.get('offset', [0])[0])
+        page_size = int(self._params.get('pageSize', [0])[0])
+        per_page = int(self._params.get('perPage', [20])[0])
+        while True:
+            r = self._fetcher.request_url(
+                url=self.get_search_request(
+                    offset=offset,
+                    page_size=page_size,
+                    per_page=per_page,
+                ),
+            )
+            for image_meta in r['results']:
+                page_url = image_meta['url']
+                items = ItemPage(
+                    page_url=page_url,
+                    meta_fetcher=self._fetcher,
+                    search_keyword=self.safe_search_keyword,
+                ).get_image_items()
+                if items:
+                    for item in items:
+                        yield item
+            req = r['request']
+            offset = req['offset'] + per_page
+            print(offset, r['totalResults'])
+            if offset > r['totalResults']:
+                break
 
 
 class ItemPage:
@@ -136,10 +148,7 @@ class ItemPage:
 
     def _mk_item(self, image_url, title, has_many=False):
         name = get_filename_fom_url(image_url)
-        meta = {
-            "title": title,
-            "has_many": has_many,
-        }
+        meta = dict(title=title, has_many=has_many)
         meta['search_keyword'] = self._search_keyword
         return ImageItem(
             image_url,
