@@ -1,4 +1,5 @@
 import json
+from queue import Empty
 from threading import Thread
 
 from flask import Flask, jsonify
@@ -82,7 +83,7 @@ class BrowserMetaFetcher:
         self.server.start()
 
     def request_url(self, url):
-        text = self.server.requester.send_and_wait(url)
+        text = self.server.requester.send_and_wait(url, timeout=10, max_retry=3)
         try:
             return json.loads(text)
         except json.JSONDecodeError:
