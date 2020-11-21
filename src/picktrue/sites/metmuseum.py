@@ -147,7 +147,10 @@ class ItemPage:
             return ""
 
     def _mk_item(self, image_url, title, has_many=False):
-        name = get_filename_fom_url(image_url)
+        if image_url.endswith("restricted") or image_url.endswith("main-image"):
+            name = "_".join(image_url.split("/")[-3:]) + ".jpg"
+        else:
+            name = get_filename_fom_url(image_url)
         meta = dict(title=title, has_many=has_many)
         meta['search_keyword'] = self._search_keyword
         return ImageItem(
@@ -164,10 +167,21 @@ class ItemPage:
         title = query("#artwork__title").text()
         extra_images = query("img.gtm__carousel__thumbnail")
         main_image = query(".artwork__interaction--download a")
+
+        has_original_image = True
+        if "Due to rights restrictions" in resp:
+            has_original_image = False
+
+        def getter(target):
+            if has_original_image:
+                return PyQuery(target).attr("data-superjumboimage")
+            else:
+                return PyQuery(target).attr("data-largeimage")
+
         if len(extra_images) > 0:
             return [
                 self._mk_item(
-                    PyQuery(img).attr("data-superjumboimage"),
+                    getter(img),
                     title=title,
                     has_many=True,
                 )
