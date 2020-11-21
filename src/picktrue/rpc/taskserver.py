@@ -1,4 +1,5 @@
 import json
+import logging
 from queue import Empty
 from threading import Thread
 
@@ -46,6 +47,7 @@ class TaskServer:
 
         def run():
             app.run(debug=True, port=2333, use_reloader=False)
+            app.logger.setLevel(logging.WARNING)
 
         self._thread = Thread(target=run)
         self._thread.setDaemon(True)

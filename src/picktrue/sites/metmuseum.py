@@ -237,6 +237,7 @@ class MetMuseum(DummySite):
 
 def main():
     import sys
+    import time
     site = MetMuseum(
         sys.argv[1],
         # "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
@@ -247,7 +248,11 @@ def main():
         site.tasks,
         background=True,
     )
-    downloader.join(background=False)
+    downloader.join(background=True)
+    while not downloader.done:
+        time.sleep(5)
+        print(downloader.describe())
+    print(downloader.describe())
 
 
 if __name__ == '__main__':

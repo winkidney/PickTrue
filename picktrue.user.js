@@ -8,7 +8,6 @@
 // @grant GM_xmlhttpRequest
 // @require https://code.jquery.com/jquery-1.12.4.min.js
 // @run-at context-menu
-// @updateURL https://github.com/winkidney/PickTrue/raw/master/artstation.user.js
 // ==/UserScript==
 let utils = {
   isFirefox: function () {
@@ -38,12 +37,19 @@ let BrowserClient = function () {
 let RequestProxy = function () {
   let client = BrowserClient();
 
-  function submitTask(respData, callback) {
+  function submitTask(request_url, respData, callback) {
     logger.info("Submit response:", respData);
     let request_data = JSON.stringify(respData);
+    let data = JSON.stringify(
+        {
+          request_url: request_url,
+          response: request_data
+        }
+    )
+
     let details = {
       url: "http://localhost:2333/tasks/submit/",
-      data: request_data,
+      data: data,
       method: "POST",
       onloadend: function (data) {
         logger.info("Submit response done: ", data);
@@ -63,10 +69,10 @@ let RequestProxy = function () {
           return getTask()
         } else {
           client.fetchUrl(
-            data[0],
-            function (respData) {
-              submitTask(respData, getTask)
-            },
+              data[0],
+              function (respData) {
+                submitTask(data[0], respData, getTask)
+              },
           )
         }
       },
