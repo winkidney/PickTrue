@@ -1,6 +1,5 @@
 import json
 import logging
-from queue import Empty
 from threading import Thread
 
 from flask import Flask, jsonify
@@ -82,6 +81,8 @@ class BrowserMetaFetcher:
     server = server
 
     def __init__(self):
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
         self.server.start()
 
     def request_url(self, url):
