@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name PickTrueBrowser
 // @author winkidney@gmail.com
-// @version 0.0.3
+// @version 0.0.4
 // @namespace tools
 // @description A tool to get meta info form ArtStation within browser to provide downloading service.
 // @match        *://*/*
