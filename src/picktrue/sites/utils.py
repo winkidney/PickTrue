@@ -34,4 +34,7 @@ def get_name_with_hash_from_url(img_url: str, file_content):
 
 
 def safe_file_name(file_name):
-    return file_name.replace("/", "_")
+    file_name = file_name.replace("/", "_")
+    file_name = file_name.replace("?", "__")
+    file_name = file_name.replace(":", "___")
+    return file_name

@@ -210,7 +210,7 @@ class Fetcher(DummyFetcher):
         if image.meta['has_many']:
             project_dir = os.path.join(
                 project_dir,
-                image.meta['title'],
+                safe_file_name(image.meta['title']),
             )
         else:
             splited = image_name.split(".")
@@ -244,7 +244,7 @@ class MetMuseum(DummySite):
 
     @property
     def tasks(self):
-        print(self._iter)
+        print("Task generator begin: ", self._base_url)
         for item in self._iter.get_image_items():
             yield item
 
@@ -252,21 +252,37 @@ class MetMuseum(DummySite):
 def main():
     import sys
     import time
-    site = MetMuseum(
-        sys.argv[1],
-        # "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
-        # "https://www.metmuseum.org/art/collection/search/35684?searchField=All&sortBy=Relevance&what=Archery&ft=*&offset=0&rpp=20&pos=13"
-    )
-    downloader = Downloader(save_dir=".", fetcher=site.fetcher)
+    if len(sys.argv) <= 1:
+        print("Error, please add argument like: picktrue-metmuseum.exe <url_or_path>")
+    url = sys.argv[1]
+    if os.path.exists(url):
+        urls = [
+            line
+            for line in open(url).readlines()
+            if line
+        ]
+    else:
+        urls = [url, ]
+    # "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
+    # "https://www.metmuseum.org/art/collection/search/35684?searchField=All&sortBy=Relevance&what=Archery&ft=*&offset=0&rpp=20&pos=13"
+
+    sites = [MetMuseum(target) for target in urls]
+
+    def task_iter():
+        for site in sites:
+            for task in site.tasks:
+                yield task
+
+    downloader = Downloader(save_dir=".", fetcher=sites[0].fetcher)
     downloader.add_task(
-        site.tasks,
+        task_iter=task_iter(),
         background=True,
     )
     downloader.join(background=True)
+
     while not downloader.done:
         time.sleep(5)
         print(downloader.describe())
-    print(downloader.describe())
 
 
 if __name__ == '__main__':
