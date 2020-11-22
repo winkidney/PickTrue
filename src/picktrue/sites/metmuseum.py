@@ -261,7 +261,10 @@ def main():
             for line in open(url).readlines()
             if line
         ]
+        save_dir = os.path.abspath(url)
+        save_dir = os.path.dirname(save_dir)
     else:
+        save_dir = "."
         urls = [url, ]
     # "https://www.metmuseum.org/art/collection/search#!?material=Archery&offset=0&perPage=20&sortBy=Relevance&sortOrder=asc&searchField=All&pageSize=0"
     # "https://www.metmuseum.org/art/collection/search/35684?searchField=All&sortBy=Relevance&what=Archery&ft=*&offset=0&rpp=20&pos=13"
@@ -272,8 +275,7 @@ def main():
         for site in sites:
             for task in site.tasks:
                 yield task
-
-    downloader = Downloader(save_dir=".", fetcher=sites[0].fetcher)
+    downloader = Downloader(save_dir=save_dir, fetcher=sites[0].fetcher)
     downloader.add_task(
         task_iter=task_iter(),
         background=True,
