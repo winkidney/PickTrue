@@ -56,7 +56,10 @@ class BrowserRequester:
         self.recv_queue.put(resp)
 
     def get_response(self, url, timeout=None):
-        got = self._lock_registry[url].acquire(timeout=timeout)
+        if timeout is None:
+            got = self._lock_registry[url].acquire()
+        else:
+            got = self._lock_registry[url].acquire(timeout=timeout)
         if got:
             ret = self._ret_registry[url]
             del self._ret_registry[url]
