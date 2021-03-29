@@ -45,18 +45,19 @@ class HuaBanFetcher(DummyFetcher):
             XHR_HEADERS,
         )
 
-    def get_save_path(self, task_item):
-        board_name = self._safe_name(task_item.image.meta['board_name'])
+    @classmethod
+    def get_huaban_save_path(cls, task_item):
+        board_name = cls._safe_name(task_item.image.meta['board_name'])
         save_path = os.path.join(
             task_item.base_save_path,
             board_name,
         )
-        self.ensure_dir(dir_path=save_path)
+        cls.ensure_dir(dir_path=save_path)
         save_path = os.path.join(
             save_path,
             task_item.image.name,
         )
-        save_path = self._safe_path(save_path)
+        save_path = cls._safe_path(save_path)
         return save_path
 
     @retry()
@@ -94,7 +95,7 @@ class HuaBanFetcher(DummyFetcher):
         """
         if task_item.image.meta is None:
             return super(HuaBanFetcher, self).save(content, task_item)
-        save_path = self.get_save_path(task_item)
+        save_path = self.get_huaban_save_path(task_item)
         with open(save_path, "wb") as f:
             f.write(content)
         pin2import = mk_pin2import(task_item)
@@ -157,7 +158,7 @@ def mk_pin2import(task_item: DownloadTaskItem) -> Pin2Import or None:
         tags=meta['tags'],
         description=meta['title'],
         board=task_item.image.meta['board_name'],
-        file_abs_path=HuaBanFetcher.get_save_path(task_item),
+        file_abs_path=HuaBanFetcher.get_huaban_save_path(task_item),
         image_url2download="",
     )
 
