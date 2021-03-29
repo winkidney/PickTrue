@@ -88,9 +88,9 @@ class DummyFetcher:
         if callable(image.name):
             image_name = image.name(image.url, content)
         save_path = self.get_save_path(
-            base_path=task_item.base_save_path,
-            image_name=image_name,
-            image=image,
+            task_item.base_save_path,
+            image_name,
+            image,
         )
         save_path = self._safe_path(save_path)
         if os.path.exists(save_path):

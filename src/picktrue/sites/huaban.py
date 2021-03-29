@@ -17,7 +17,7 @@ from picktrue.sites.utils import safe_file_name
 from picktrue.utils import retry
 
 IMAGE_URL_TPL = "http://img.hb.aicdn.com/{file_key}"
-BASE_URL = "http://huaban.com"
+BASE_URL = "https://huaban.com"
 
 XHR_HEADERS = {
     "X-Requested-With": "XMLHttpRequest",
@@ -45,19 +45,18 @@ class HuaBanFetcher(DummyFetcher):
             XHR_HEADERS,
         )
 
-    @classmethod
-    def get_save_path(cls, task_item):
-        board_name = cls._safe_name(task_item.image.meta['board_name'])
+    def get_save_path(self, task_item):
+        board_name = self._safe_name(task_item.image.meta['board_name'])
         save_path = os.path.join(
             task_item.base_save_path,
             board_name,
         )
-        cls.ensure_dir(dir_path=save_path)
+        self.ensure_dir(dir_path=save_path)
         save_path = os.path.join(
             save_path,
             task_item.image.name,
         )
-        save_path = cls._safe_path(save_path)
+        save_path = self._safe_path(save_path)
         return save_path
 
     @retry()
