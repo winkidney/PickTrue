@@ -273,9 +273,10 @@ def mk_pin(pin_meta):
 
 
 class User(object):
-    def __init__(self, user_url):
+    def __init__(self, user_url: str):
         self.fetcher = HuaBanFetcher()
-        self.base_url = user_url
+        user_uid = user_url.split("/")[-1]
+        self.base_url = f"https://api.huaban.com/{user_uid}/boards?limit=30&urlname={user_uid}"
         self.further_url_tpl = urljoin(
             self.base_url,
             "?{random_str}"
@@ -292,11 +293,12 @@ class User(object):
 
     def _fetch_home(self):
         resp = self.fetcher.get(self.base_url, require_json=True)
-        user_meta = resp.json()['user']
+        meta = resp.json()
+        user_meta = meta['user']
         self.username = user_meta['username']
         self.board_count = user_meta['board_count']
         self.pin_count = user_meta['pin_count']
-        return get_boards(user_meta)
+        return get_boards(meta)
 
     _init_profile = _fetch_home
 
