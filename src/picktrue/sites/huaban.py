@@ -168,7 +168,7 @@ class Board(object):
         board_id = str(board_url_or_id)
         self.fetcher = HuaBanFetcher()
         if "http" in board_id:
-            board_id = re.findall(r'boards/(\d+)/', board_id)[0]
+            board_id = re.findall(r'boards/(\d+)', board_id)[0]
         self.id = board_id
         path = "/boards/{board_id}/".format(
             board_id=board_id,
