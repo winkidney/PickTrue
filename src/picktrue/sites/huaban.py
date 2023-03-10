@@ -1,6 +1,6 @@
 import re
 from json import JSONDecodeError
-from pprint import pformat
+from pprint import pformat, pprint
 
 import os
 
@@ -114,10 +114,9 @@ def _get_file_ext(mime_type):
     return mime_type.split("/")[-1]
 
 
-def get_pins(board_dict):
-    board = board_dict
+def get_pins(pins_meta):
     pins = []
-    for info in board['pins']:
+    for info in pins_meta:
         ext = _get_file_ext(info['file']['type'])
         file_name = "%s.%s" % (info['pin_id'], ext)
         meta = {
@@ -135,9 +134,9 @@ def get_pins(board_dict):
     return pins
 
 
-def get_boards(user_meta):
+def get_boards(boards_meta):
     boards = []
-    for board in user_meta['boards']:
+    for board in boards_meta:
         meta = {
             "board_id": board['board_id'],
             "title": board['title'],
@@ -164,23 +163,17 @@ def mk_pin2import(task_item: DownloadTaskItem) -> Pin2Import or None:
 
 
 class Board(object):
+
+    BOARD_API_BASE = "https://api.huaban.com/boards/{board_id}/pins?limit=20"
+
     def __init__(self, board_url_or_id):
         board_id = str(board_url_or_id)
         self.fetcher = HuaBanFetcher()
         if "http" in board_id:
             board_id = re.findall(r'boards/(\d+)', board_id)[0]
         self.id = board_id
-        path = "/boards/{board_id}/".format(
-            board_id=board_id,
-        )
-        self.base_url = urljoin(BASE_URL, path)
-        self.further_pin_url_tpl = urljoin(
-            self.base_url,
-            "?{random_string}"
-            "&max={pin_id}"
-            "&limit=20"
-            "&wfl=1"
-        )
+        self.base_url = self.BOARD_API_BASE.format(board_id=board_id)
+        self.further_pin_url_tpl = self.base_url + "&max={pin_id}"
 
         # uninitialized properties
         self.pin_count = None
@@ -199,7 +192,7 @@ class Board(object):
         self.pin_count = board['pin_count']
         self.title = board['title']
         self.description = board['description']
-        return get_pins(board)
+        return get_pins(resp['pins'])
 
     _init_board = _fetch_home
 
@@ -224,7 +217,6 @@ class Board(object):
         max_id = prev_pins[-1]['pin_id']
         further_url = self.further_pin_url_tpl.format(
             pin_id=max_id,
-            random_string=_random_string(8),
         )
 
         resp = self.fetcher.get(
@@ -232,7 +224,7 @@ class Board(object):
             require_json=True,
         )
         content = resp.json()
-        return get_pins(content['board'])
+        return get_pins(content['pins'])
 
     def _fetch_pins(self):
         assert len(self._pins) == 0
@@ -273,17 +265,15 @@ def mk_pin(pin_meta):
 
 
 class User(object):
+    BOARDS_URL_TPL = "https://api.huaban.com/{user_id}/boards?limit=30&urlname={user_id}"
+
     def __init__(self, user_url: str):
         self.fetcher = HuaBanFetcher()
         user_uid = user_url.split("/")[-1]
-        self.base_url = f"https://api.huaban.com/{user_uid}/boards?limit=30&urlname={user_uid}"
-        self.further_url_tpl = urljoin(
-            self.base_url,
-            "?{random_str}"
-            "&max={board_id}"
-            "&limit=10"
-            "&wfl=1"
+        self.base_url = self.BOARDS_URL_TPL.format(
+            user_id=user_uid
         )
+        self.further_url_tpl = self.base_url + "&max={board_id}"
 
         self.username = None
         self.board_count = None
@@ -298,14 +288,13 @@ class User(object):
         self.username = user_meta['username']
         self.board_count = user_meta['board_count']
         self.pin_count = user_meta['pin_count']
-        return get_boards(meta)
+        return get_boards(meta['boards'])
 
     _init_profile = _fetch_home
 
     def _fetch_further(self, prev_boards):
         max_id = prev_boards[-1]['board_id']
         further_url = self.further_url_tpl.format(
-            random_str=_random_string(8),
             board_id=max_id,
         )
         resp = self.fetcher.get(
@@ -313,7 +302,7 @@ class User(object):
             require_json=True,
         )
         content = resp.json()
-        return get_boards(content['user'])
+        return get_boards(content['boards'])
 
     def _fetch_boards(self):
         assert len(self._boards_metas) == 0
